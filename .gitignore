@@ -1,0 +1,33 @@
+# Ignore Jupyter notebook checkpoints
+.ipynb_checkpoints/
+
+# Ignore Python cache and data files
+*.pyc
+*.png
+*.tif
+*.jpg
+*.pth
+*.mat
+*.npy
+.DS_Store
+.idea
+
+# Ignore additional specified directories and files
+.eggs/
+archive_experiments_realblurJ/
+archived_experiments_realblurR+deblur1sttr/
+archived_experiments_realblurR+deblur1sttry/
+Defocus_Deblurring/Datasets/Downloads/DPDD/
+Defocus_Deblurring/Defocus_Deblurring/Datasets/new/
+Defocus_Deblurring/defocus_formal/
+experiments_2/
+experiments/
+old_experiments_defocsformal/
+old2experiments/
+RealBlur-J_ECC_IMCORR_centroid_itensity_ref/
+RealBlur-R_BM3D_ECC_IMCORR_centroid_itensity_ref/
+tb_logger/
+RealBlur.tar.gz
+go1.11.1.linux-amd64.tar.gz
+libcudnn8-dev_8.0.5.39-1+cuda11.1_amd64.deb
+archive\ \(1\).zip
