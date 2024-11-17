@@ -1,7 +1,7 @@
-# Ignore Jupyter notebook checkpoints
+# Ignore Jupyter notebook checkpoints.
 .ipynb_checkpoints/
 
-# Ignore Python cache and data files
+# Ignore Python cache and data files.
 *.pyc
 *.png
 *.tif
@@ -12,7 +12,7 @@
 .DS_Store
 .idea
 
-# Ignore additional specified directories and files
+# Ignore additional specified directories and files.
 .eggs/
 archive_experiments_realblurJ/
 archived_experiments_realblurR+deblur1sttr/
