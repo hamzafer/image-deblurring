@@ -21,8 +21,66 @@ from pdb import set_trace as stx
 import warnings
 warnings.filterwarnings("ignore")
 
+import kornia.color
+
 import lpips
 alex = lpips.LPIPS(net='alex').cuda()
+
+def delta_e_cie2000_torch(lab1, lab2):
+    """
+    Compute CIEDE2000 color difference for tensors on GPU.
+
+    Args:
+        lab1, lab2: Tensors of shape (batch_size, height, width, 3) or (height, width, 3)
+                    where last dimension represents [L, a, b].
+
+    Returns:
+        Delta E (CIEDE2000) color difference as a tensor of shape (batch_size, height, width).
+    """
+    # Convert tensors to LabColor objects
+    lab1 =  kornia.color.rgb_to_lab(lab1)
+    lab2 =  kornia.color.rgb_to_lab(lab2)
+    
+    L1, a1, b1 = lab1[..., 0], lab1[..., 1], lab1[..., 2]
+    L2, a2, b2 = lab2[..., 0], lab2[..., 1], lab2[..., 2]
+
+    # Mean values
+    L_avg = (L1 + L2) / 2.0
+    C1 = torch.sqrt(a1**2 + b1**2)
+    C2 = torch.sqrt(a2**2 + b2**2)
+    C_avg = (C1 + C2) / 2.0
+
+    G = 0.5 * (1 - torch.sqrt(C_avg**7 / (C_avg**7 + 25**7)))
+    a1_prime = a1 * (1 + G)
+    a2_prime = a2 * (1 + G)
+
+    C1_prime = torch.sqrt(a1_prime**2 + b1**2)
+    C2_prime = torch.sqrt(a2_prime**2 + b2**2)
+    C_avg_prime = (C1_prime + C2_prime) / 2.0
+
+    h1_prime = torch.atan2(b1, a1_prime)
+    h2_prime = torch.atan2(b2, a2_prime)
+
+    torch.pi = torch.acos(torch.tensor(-1.0))
+    h1_prime = h1_prime % (2 * torch.pi)
+    h2_prime = h2_prime % (2 * torch.pi)
+
+    delta_L_prime = L2 - L1
+    delta_C_prime = C2_prime - C1_prime
+
+    h_diff = h2_prime - h1_prime
+    delta_h_prime = 2 * torch.sqrt(C1_prime * C2_prime) * torch.sin(h_diff / 2)
+
+    # Weighted terms
+    L_term = delta_L_prime / (1 + 0.015 * (L_avg - 50)**2)
+    C_term = delta_C_prime / (1 + 0.045 * C_avg_prime)
+    H_term = delta_h_prime / (1 + 0.015 * C_avg_prime)
+
+    # Final delta E calculation
+    delta_e = torch.sqrt(L_term**2 + C_term**2 + H_term**2)
+
+    return delta_e
+
 
 parser = argparse.ArgumentParser(description='Single Image Motion Deblurring using Restormer')
 
@@ -69,6 +127,8 @@ filesI = natsorted(glob(os.path.join(inp_dir, '*.png')) + glob(os.path.join(inp_
 filesC = natsorted(glob(os.path.join(tar_dir, '*.png')) + glob(os.path.join(tar_dir, '*.jpg')))
 
 psnr, mae, ssim, pips = [], [], [], []
+color_diffs = []
+
 with torch.no_grad():
     for fileI, fileC in tqdm(zip(filesI, filesC), total=len(filesC)):
         torch.cuda.ipc_collect()
@@ -98,15 +158,30 @@ with torch.no_grad():
         psps = alex(target, restored, normalize=True).item()
         pips.append(alex(target, restored, normalize=True).item())
 
+        delta_e_cie2000 = delta_e_cie2000_torch(target, restored)
+        delta_e_cie2000 = delta_e_cie2000.mean().item()
+        color_diffs.append(delta_e_cie2000)
+
         restored = restored.cpu().detach().permute(0, 2, 3,1).squeeze(0).numpy()
         
+
         psnr.append(utils.PSNR(imgC, restored))
         mae.append(utils.MAE(imgC, restored))
         ssim.append(utils.SSIM(imgC, restored))
 
-        if utils.PSNR(imgC, restored) <= 25 or utils.PSNR(imgC, restored) >=40:
-            print("Image {}: PSNR {:4f} SSIM {:4f} MAE {:4f} LPIPS {:4f}".format(fileC.split("/")[-1], (utils.PSNR(imgC, restored)), (utils.SSIM(imgC, restored)), (utils.MAE(imgC, restored)), (psps)))
-            utils.save_img((os.path.join(result_dir, os.path.splitext('res_'+os.path.split(fileC)[-1])[0]+'.png')), img_as_ubyte(restored))
+        if utils.PSNR(imgC, restored) <= 20 :
+            print("Image {}: PSNR {:4f} SSIM {:4f} MAE {:4f} LPIPS {:4f} Color Delta {:4f}".format(fileC.split("/")[-1], (utils.PSNR(imgC, restored)), (utils.SSIM(imgC, restored)), (utils.MAE(imgC, restored)), (psps), delta_e_cie2000))
+            save_file = os.path.join(result_dir, "bad", os.path.split(fileC)[-1])
+            restored = np.uint8((restored*255).round())
+            utils.save_img(save_file, restored)
 
+        if utils.PSNR(imgC, restored) >= 33:
+            print("Image {}: PSNR {:4f} SSIM {:4f} MAE {:4f} LPIPS {:4f} Color Delta {:4f}".format(fileC.split("/")[-1], (utils.PSNR(imgC, restored)), (utils.SSIM(imgC, restored)), (utils.MAE(imgC, restored)), (psps), delta_e_cie2000))
+            save_file = os.path.join(result_dir, "good", os.path.split(fileC)[-1])
+            restored = np.uint8((restored*255).round())
+            utils.save_img(save_file, restored)
 
-print("Overall: PSNR {:4f} SSIM {:4f} MAE {:4f} LPIPS {:4f}".format(np.mean(psnr), np.mean(ssim), np.mean(mae), np.mean(pips)))
+psnr, mae, ssim, pips = np.array(psnr), np.array(mae), np.array(ssim), np.array(pips)
+color_diffs = np.array(color_diffs)
+
+print("Overall: PSNR {:4f} SSIM {:4f} MAE {:4f} LPIPS {:4f} Color Delta {:4f}".format(np.mean(psnr), np.mean(ssim), np.mean(mae), np.mean(pips), np.mean(color_diffs)))

@@ -21,8 +21,8 @@ datasets:
 
     # data loader
     use_shuffle: true
-    num_worker_per_gpu: 100
-    batch_size_per_gpu: 2
+    num_worker_per_gpu: 12
+    batch_size_per_gpu: 8
 
     ### -------------Progressive training--------------------------
     mini_batch_sizes: [8,5,4,2,1,1]             # Batch size per gpu   
