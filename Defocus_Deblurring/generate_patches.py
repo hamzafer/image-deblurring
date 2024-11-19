@@ -136,7 +136,7 @@ random.seed(42)
 
 # Paths
 src = './defocus_formal'  # Change this to your dataset path
-tar = './Datasets/new'  # Change this to your output path
+tar = './Datasets/LSD'  # Change this to your output path
 
 # Create directories
 src_train_tar = os.path.join(tar, 'train/input_crops')
