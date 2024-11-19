@@ -164,20 +164,44 @@ split_idx = int(len(files) * train_ratio)
 train_files = files[:split_idx]
 val_files = files[split_idx:]
 
+test_files = val_files[500:]
+
 print(f"Total images: {len(files)}")
 print(f"Training images: {len(train_files)}")
 print(f"Validation images: {len(val_files)}")
 
-# Process training files
-print("Processing training files...")
-Parallel(n_jobs=num_cores)(
-    delayed(process_image_pair)(file_, False) for file_ in tqdm(train_files)
-)
+test_dir_input = os.path.join(tar, 'test/input_crops')
+test_dir_target = os.path.join(tar, 'test/target_crops')
 
-# Process validation files
-print("Processing validation files...")
-Parallel(n_jobs=num_cores)(
-    delayed(process_image_pair)(file_, True) for file_ in tqdm(val_files)
-)
+os.makedirs(test_dir_input, exist_ok=True)
+os.makedirs(test_dir_target, exist_ok=True)
+
+# Save test files
+print(f"Test images: {len(test_files)}")
+for src_file, trg_file in tqdm(test_files, desc="Saving test files"):
+    filename = os.path.splitext(os.path.split(src_file)[-1])[0]
+    
+    src_img = cv2.imread(src_file, -1)
+    trg_img = cv2.imread(trg_file, -1)
+    
+    src_savename = os.path.join(test_dir_input, filename + '.png')
+    trg_savename = os.path.join(test_dir_target, filename + '.png')
+    
+    cv2.imwrite(src_savename, src_img)
+    cv2.imwrite(trg_savename, trg_img)
+
+print("Test files saved successfully.")
+
+# # Process training files
+# print("Processing training files...")
+# Parallel(n_jobs=num_cores)(
+#     delayed(process_image_pair)(file_, False) for file_ in tqdm(train_files)
+# )
+
+# # Process validation files
+# print("Processing validation files...")
+# Parallel(n_jobs=num_cores)(
+#     delayed(process_image_pair)(file_, True) for file_ in tqdm(val_files)
+# )
 
 print("Done!")

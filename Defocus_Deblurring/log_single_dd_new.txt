@@ -1,0 +1,283 @@
+Setting up [LPIPS] perceptual loss: trunk [alex], v[0.1], spatial [off]
+Loading model from: /home/user1/miniconda3/envs/pytorch181/lib/python3.7/site-packages/lpips/weights/v0.1/alex.pth
+===>Testing using weights:  ./pretrained_models/single_image_defocus_deblurring.pth
+./Datasets/new/test/input_crops/f1_defocus_00002_t1.png
+Image f1_defocus_00002_t1.png: PSNR 17.291342 SSIM 0.581103 MAE 0.085225 LPIPS 0.544520 Color Delta 3.242412
+./Datasets/new/test/input_crops/f1_defocus_00012_t3.png
+./Datasets/new/test/input_crops/f1_defocus_00026_t2.png
+Image f1_defocus_00026_t2.png: PSNR 20.083757 SSIM 0.486552 MAE 0.083237 LPIPS 0.770018 Color Delta 2.394888
+./Datasets/new/test/input_crops/f1_defocus_00028_t3.png
+Image f1_defocus_00028_t3.png: PSNR 19.344988 SSIM 0.425442 MAE 0.075111 LPIPS 0.695492 Color Delta 3.416620
+./Datasets/new/test/input_crops/f1_defocus_00046_t3.png
+Image f1_defocus_00046_t3.png: PSNR 18.207833 SSIM 0.322106 MAE 0.091342 LPIPS 0.770779 Color Delta 6.198735
+./Datasets/new/test/input_crops/f1_defocus_00078_t4.png
+Image f1_defocus_00078_t4.png: PSNR 19.483618 SSIM 0.484814 MAE 0.076080 LPIPS 0.606379 Color Delta 4.330290
+./Datasets/new/test/input_crops/f1_defocus_00086_t1.png
+Image f1_defocus_00086_t1.png: PSNR 16.548238 SSIM 0.352565 MAE 0.103260 LPIPS 0.715492 Color Delta 4.785749
+./Datasets/new/test/input_crops/f1_defocus_00102_t1.png
+Image f1_defocus_00102_t1.png: PSNR 17.518512 SSIM 0.446977 MAE 0.091347 LPIPS 0.595701 Color Delta 5.113587
+./Datasets/new/test/input_crops/f1_defocus_00108_t2.png
+./Datasets/new/test/input_crops/f1_defocus_00122_t1.png
+./Datasets/new/test/input_crops/f1_defocus_00128_t2.png
+./Datasets/new/test/input_crops/f1_defocus_00130_t1.png
+Image f1_defocus_00130_t1.png: PSNR 15.707391 SSIM 0.501747 MAE 0.106070 LPIPS 0.505575 Color Delta 5.302800
+./Datasets/new/test/input_crops/f1_defocus_00130_t3.png
+Image f1_defocus_00130_t3.png: PSNR 19.165938 SSIM 0.502365 MAE 0.077272 LPIPS 0.588126 Color Delta 4.532334
+./Datasets/new/test/input_crops/f2_defocus_00044_t4.png
+./Datasets/new/test/input_crops/f2_defocus_00054_t4.png
+./Datasets/new/test/input_crops/f2_defocus_00060_t2.png
+./Datasets/new/test/input_crops/f2_defocus_00096_t3.png
+Image f2_defocus_00096_t3.png: PSNR 19.453032 SSIM 0.600794 MAE 0.084076 LPIPS 0.435922 Color Delta 3.519116
+./Datasets/new/test/input_crops/f2_defocus_00104_t3.png
+Image f2_defocus_00104_t3.png: PSNR 20.342395 SSIM 0.583332 MAE 0.060295 LPIPS 0.596144 Color Delta 4.921046
+./Datasets/new/test/input_crops/f2_defocus_00108_t3.png
+Image f2_defocus_00108_t3.png: PSNR 19.715457 SSIM 0.465775 MAE 0.071519 LPIPS 0.626541 Color Delta 3.500526
+./Datasets/new/test/input_crops/f3_defocus_00003_t1.png
+Image f3_defocus_00003_t1.png: PSNR 17.112162 SSIM 0.631389 MAE 0.082303 LPIPS 0.567480 Color Delta 2.479800
+./Datasets/new/test/input_crops/f3_defocus_00005_t1.png
+Image f3_defocus_00005_t1.png: PSNR 14.636878 SSIM 0.743864 MAE 0.130637 LPIPS 0.481986 Color Delta 4.113233
+./Datasets/new/test/input_crops/f3_defocus_00013_t3.png
+Image f3_defocus_00013_t3.png: PSNR 14.072568 SSIM 0.726672 MAE 0.163487 LPIPS 0.503346 Color Delta 6.435034
+./Datasets/new/test/input_crops/f3_defocus_00019_t1.png
+Image f3_defocus_00019_t1.png: PSNR 12.594661 SSIM 0.507498 MAE 0.174859 LPIPS 0.642354 Color Delta 1.897948
+./Datasets/new/test/input_crops/f3_defocus_00025_t3.png
+Image f3_defocus_00025_t3.png: PSNR 15.789812 SSIM 0.542933 MAE 0.143872 LPIPS 0.633203 Color Delta 3.591260
+./Datasets/new/test/input_crops/f3_defocus_00027_t2.png
+Image f3_defocus_00027_t2.png: PSNR 13.147628 SSIM 0.757282 MAE 0.197089 LPIPS 0.474414 Color Delta 4.413886
+./Datasets/new/test/input_crops/f3_defocus_00033_t2.png
+./Datasets/new/test/input_crops/f3_defocus_00035_t1.png
+Image f3_defocus_00035_t1.png: PSNR 18.493891 SSIM 0.846840 MAE 0.106186 LPIPS 0.366105 Color Delta 5.957105
+./Datasets/new/test/input_crops/f3_defocus_00065_t2.png
+Image f3_defocus_00065_t2.png: PSNR 15.076127 SSIM 0.796639 MAE 0.173710 LPIPS 0.630275 Color Delta 3.753496
+./Datasets/new/test/input_crops/f3_defocus_00069_t2.png
+./Datasets/new/test/input_crops/f3_defocus_00093_t2.png
+Image f3_defocus_00093_t2.png: PSNR 15.426385 SSIM 0.649152 MAE 0.165963 LPIPS 0.604790 Color Delta 4.806347
+./Datasets/new/test/input_crops/f3_defocus_00099_t1.png
+Image f3_defocus_00099_t1.png: PSNR 13.232608 SSIM 0.621252 MAE 0.179311 LPIPS 0.476766 Color Delta 5.830878
+./Datasets/new/test/input_crops/f3_defocus_00115_t1.png
+./Datasets/new/test/input_crops/f3_defocus_00121_t4.png
+Image f3_defocus_00121_t4.png: PSNR 16.299901 SSIM 0.517241 MAE 0.135244 LPIPS 0.620662 Color Delta 5.495259
+./Datasets/new/test/input_crops/f3_defocus_00125_t4.png
+Image f3_defocus_00125_t4.png: PSNR 13.945164 SSIM 0.436153 MAE 0.169309 LPIPS 0.783850 Color Delta 6.596358
+./Datasets/new/test/input_crops/f3_defocus_00139_t1.png
+Image f3_defocus_00139_t1.png: PSNR 15.471688 SSIM 0.685258 MAE 0.111445 LPIPS 0.408090 Color Delta 4.127948
+./Datasets/new/test/input_crops/f3_defocus_00155_t4.png
+Image f3_defocus_00155_t4.png: PSNR 20.350896 SSIM 0.877594 MAE 0.089295 LPIPS 0.464535 Color Delta 1.728835
+./Datasets/new/test/input_crops/f3_defocus_00161_t2.png
+./Datasets/new/test/input_crops/f3_defocus_00161_t4.png
+./Datasets/new/test/input_crops/f3_defocus_00177_t4.png
+Image f3_defocus_00177_t4.png: PSNR 19.631555 SSIM 0.835795 MAE 0.088731 LPIPS 0.441267 Color Delta 2.651567
+./Datasets/new/test/input_crops/f3_defocus_00191_t3.png
+Image f3_defocus_00191_t3.png: PSNR 16.632124 SSIM 0.502512 MAE 0.108564 LPIPS 0.715686 Color Delta 3.248695
+./Datasets/new/test/input_crops/f3_defocus_00199_t1.png
+Image f3_defocus_00199_t1.png: PSNR 16.328604 SSIM 0.715732 MAE 0.136128 LPIPS 0.580000 Color Delta 4.070839
+./Datasets/new/test/input_crops/f3_defocus_00199_t2.png
+Image f3_defocus_00199_t2.png: PSNR 16.928796 SSIM 0.614773 MAE 0.129815 LPIPS 0.618010 Color Delta 4.599455
+./Datasets/new/test/input_crops/f3_defocus_00201_t1.png
+Image f3_defocus_00201_t1.png: PSNR 14.433325 SSIM 0.531802 MAE 0.124561 LPIPS 0.613404 Color Delta 3.402761
+./Datasets/new/test/input_crops/f3_defocus_00211_t3.png
+./Datasets/new/test/input_crops/f3_defocus_00237_t4.png
+./Datasets/new/test/input_crops/f3_defocus_00253_t3.png
+Image f3_defocus_00253_t3.png: PSNR 17.739806 SSIM 0.548418 MAE 0.096454 LPIPS 0.677411 Color Delta 4.381819
+./Datasets/new/test/input_crops/f3_defocus_00257_t3.png
+Image f3_defocus_00257_t3.png: PSNR 18.987463 SSIM 0.586320 MAE 0.095636 LPIPS 0.567626 Color Delta 3.400399
+./Datasets/new/test/input_crops/f3_defocus_00267_t4.png
+./Datasets/new/test/input_crops/f3_defocus_00308_t2.png
+Image f3_defocus_00308_t2.png: PSNR 18.997362 SSIM 0.790923 MAE 0.104173 LPIPS 0.538462 Color Delta 2.991601
+./Datasets/new/test/input_crops/f3_defocus_00312_t4.png
+./Datasets/new/test/input_crops/f3_defocus_00326_t3.png
+Image f3_defocus_00326_t3.png: PSNR 18.102163 SSIM 0.768767 MAE 0.095119 LPIPS 0.468619 Color Delta 3.114161
+./Datasets/new/test/input_crops/f3_defocus_00368_t1.png
+Image f3_defocus_00368_t1.png: PSNR 16.994084 SSIM 0.814042 MAE 0.122634 LPIPS 0.371905 Color Delta 3.468339
+./Datasets/new/test/input_crops/f3_defocus_00378_t2.png
+Image f3_defocus_00378_t2.png: PSNR 15.761325 SSIM 0.586570 MAE 0.145942 LPIPS 0.658949 Color Delta 5.219916
+./Datasets/new/test/input_crops/f3_defocus_00388_t4.png
+Image f3_defocus_00388_t4.png: PSNR 20.116590 SSIM 0.602077 MAE 0.059589 LPIPS 0.570842 Color Delta 1.820954
+./Datasets/new/test/input_crops/f3_defocus_00394_t4.png
+Image f3_defocus_00394_t4.png: PSNR 16.572318 SSIM 0.483933 MAE 0.134661 LPIPS 0.614922 Color Delta 4.378661
+./Datasets/new/test/input_crops/f3_defocus_00396_t3.png
+./Datasets/new/test/input_crops/f3_defocus_00402_t4.png
+./Datasets/new/test/input_crops/f3_defocus_00408_t1.png
+Image f3_defocus_00408_t1.png: PSNR 17.893963 SSIM 0.746721 MAE 0.112102 LPIPS 0.333432 Color Delta 3.052969
+./Datasets/new/test/input_crops/f3_defocus_00410_t3.png
+./Datasets/new/test/input_crops/f3_defocus_00418_t1.png
+./Datasets/new/test/input_crops/f3_defocus_00442_t2.png
+./Datasets/new/test/input_crops/f3_defocus_00472_t4.png
+./Datasets/new/test/input_crops/f3_defocus_00528_t4.png
+Image f3_defocus_00528_t4.png: PSNR 17.058451 SSIM 0.734334 MAE 0.096778 LPIPS 0.342087 Color Delta 2.870474
+./Datasets/new/test/input_crops/f3_defocus_00556_t1.png
+./Datasets/new/test/input_crops/f3_defocus_00556_t2.png
+./Datasets/new/test/input_crops/f3_defocus_00565_t4.png
+Image f3_defocus_00565_t4.png: PSNR 17.026025 SSIM 0.876775 MAE 0.137975 LPIPS 0.296871 Color Delta 4.075901
+./Datasets/new/test/input_crops/f3_defocus_00601_t1.png
+Image f3_defocus_00601_t1.png: PSNR 16.066983 SSIM 0.700401 MAE 0.137528 LPIPS 0.509694 Color Delta 6.694149
+./Datasets/new/test/input_crops/f3_defocus_00607_t1.png
+./Datasets/new/test/input_crops/f3_defocus_00609_t4.png
+Image f3_defocus_00609_t4.png: PSNR 18.775508 SSIM 0.711314 MAE 0.097384 LPIPS 0.446074 Color Delta 3.612367
+./Datasets/new/test/input_crops/f3_defocus_00613_t2.png
+Image f3_defocus_00613_t2.png: PSNR 11.676559 SSIM 0.389917 MAE 0.205639 LPIPS 0.706654 Color Delta 7.167616
+./Datasets/new/test/input_crops/f3_defocus_00623_t4.png
+./Datasets/new/test/input_crops/f3_defocus_00637_t4.png
+./Datasets/new/test/input_crops/f3_defocus_00641_t1.png
+./Datasets/new/test/input_crops/f3_defocus_00641_t4.png
+./Datasets/new/test/input_crops/f3_defocus_00645_t1.png
+Image f3_defocus_00645_t1.png: PSNR 18.029177 SSIM 0.612947 MAE 0.075170 LPIPS 0.673862 Color Delta 5.001132
+./Datasets/new/test/input_crops/f3_defocus_00645_t2.png
+Image f3_defocus_00645_t2.png: PSNR 18.663347 SSIM 0.240875 MAE 0.085801 LPIPS 0.813230 Color Delta 4.274019
+./Datasets/new/test/input_crops/f3_defocus_00657_t1.png
+Image f3_defocus_00657_t1.png: PSNR 16.599912 SSIM 0.655347 MAE 0.125741 LPIPS 0.548710 Color Delta 4.484031
+./Datasets/new/test/input_crops/f3_defocus_00663_t1.png
+Image f3_defocus_00663_t1.png: PSNR 20.243736 SSIM 0.799786 MAE 0.078507 LPIPS 0.412330 Color Delta 4.192241
+./Datasets/new/test/input_crops/f3_defocus_00675_t3.png
+./Datasets/new/test/input_crops/f3_defocus_00679_t4.png
+./Datasets/new/test/input_crops/f3_defocus_00681_t1.png
+./Datasets/new/test/input_crops/f3_defocus_00685_t2.png
+Image f3_defocus_00685_t2.png: PSNR 16.058173 SSIM 0.574224 MAE 0.146955 LPIPS 0.535998 Color Delta 5.298707
+./Datasets/new/test/input_crops/f3_defocus_00697_t2.png
+Image f3_defocus_00697_t2.png: PSNR 11.787270 SSIM 0.572402 MAE 0.203401 LPIPS 0.758685 Color Delta 8.670011
+./Datasets/new/test/input_crops/f3_defocus_00697_t4.png
+Image f3_defocus_00697_t4.png: PSNR 16.439350 SSIM 0.572890 MAE 0.119211 LPIPS 0.736469 Color Delta 6.523611
+./Datasets/new/test/input_crops/f3_defocus_00725_t2.png
+./Datasets/new/test/input_crops/f3_defocus_00731_t2.png
+Image f3_defocus_00731_t2.png: PSNR 17.946103 SSIM 0.563467 MAE 0.098576 LPIPS 0.433221 Color Delta 3.230799
+./Datasets/new/test/input_crops/f3_defocus_00747_t2.png
+./Datasets/new/test/input_crops/f3_defocus_00747_t3.png
+./Datasets/new/test/input_crops/f3_defocus_00755_t1.png
+Image f3_defocus_00755_t1.png: PSNR 19.443631 SSIM 0.919328 MAE 0.103045 LPIPS 0.277867 Color Delta 4.207352
+./Datasets/new/test/input_crops/f3_defocus_00759_t3.png
+./Datasets/new/test/input_crops/f3_defocus_00775_t4.png
+./Datasets/new/test/input_crops/f3_defocus_00823_t1.png
+./Datasets/new/test/input_crops/f3_defocus_00825_t2.png
+./Datasets/new/test/input_crops/f3_defocus_00829_t3.png
+./Datasets/new/test/input_crops/f3_defocus_00831_t2.png
+./Datasets/new/test/input_crops/f3_defocus_00831_t4.png
+./Datasets/new/test/input_crops/f3_defocus_00839_t2.png
+Image f3_defocus_00839_t2.png: PSNR 16.179420 SSIM 0.324174 MAE 0.129545 LPIPS 0.775160 Color Delta 4.063569
+./Datasets/new/test/input_crops/f3_defocus_00839_t4.png
+Image f3_defocus_00839_t4.png: PSNR 16.901171 SSIM 0.503984 MAE 0.121289 LPIPS 0.658872 Color Delta 4.016402
+./Datasets/new/test/input_crops/f3_defocus_00843_t2.png
+Image f3_defocus_00843_t2.png: PSNR 17.037512 SSIM 0.475188 MAE 0.118920 LPIPS 0.660135 Color Delta 4.692101
+./Datasets/new/test/input_crops/f3_defocus_00851_t4.png
+./Datasets/new/test/input_crops/f3_defocus_00873_t2.png
+./Datasets/new/test/input_crops/f3_defocus_00884_t1.png
+./Datasets/new/test/input_crops/f3_defocus_00884_t2.png
+./Datasets/new/test/input_crops/f3_defocus_00884_t3.png
+./Datasets/new/test/input_crops/f4_defocus_00000_t3.png
+./Datasets/new/test/input_crops/f4_defocus_00016_t2.png
+Image f4_defocus_00016_t2.png: PSNR 17.856443 SSIM 0.820899 MAE 0.121425 LPIPS 0.539838 Color Delta 3.831930
+./Datasets/new/test/input_crops/f4_defocus_00018_t1.png
+Image f4_defocus_00018_t1.png: PSNR 20.432681 SSIM 0.845910 MAE 0.082519 LPIPS 0.372071 Color Delta 4.062346
+./Datasets/new/test/input_crops/f4_defocus_00038_t1.png
+Image f4_defocus_00038_t1.png: PSNR 16.837132 SSIM 0.896447 MAE 0.139274 LPIPS 0.460495 Color Delta 3.193043
+./Datasets/new/test/input_crops/f4_defocus_00074_t4.png
+Image f4_defocus_00074_t4.png: PSNR 20.439059 SSIM 0.712446 MAE 0.058824 LPIPS 0.593333 Color Delta 2.107334
+./Datasets/new/test/input_crops/f4_defocus_00092_t2.png
+Image f4_defocus_00092_t2.png: PSNR 13.321417 SSIM 0.614579 MAE 0.198676 LPIPS 0.579659 Color Delta 6.095498
+./Datasets/new/test/input_crops/f4_defocus_00104_t2.png
+./Datasets/new/test/input_crops/f4_defocus_00108_t1.png
+./Datasets/new/test/input_crops/f4_defocus_00142_t4.png
+Image f4_defocus_00142_t4.png: PSNR 19.457151 SSIM 0.888614 MAE 0.097213 LPIPS 0.267902 Color Delta 5.825234
+./Datasets/new/test/input_crops/f4_defocus_00144_t1.png
+Image f4_defocus_00144_t1.png: PSNR 18.066934 SSIM 0.846813 MAE 0.116517 LPIPS 0.338791 Color Delta 4.228658
+./Datasets/new/test/input_crops/f4_defocus_00194_t2.png
+Image f4_defocus_00194_t2.png: PSNR 19.582823 SSIM 0.807709 MAE 0.101627 LPIPS 0.667156 Color Delta 2.855978
+./Datasets/new/test/input_crops/f4_defocus_00200_t2.png
+./Datasets/new/test/input_crops/f4_defocus_00208_t3.png
+Image f4_defocus_00208_t3.png: PSNR 18.467257 SSIM 0.912251 MAE 0.114900 LPIPS 0.245396 Color Delta 3.783250
+./Datasets/new/test/input_crops/f4_defocus_00208_t4.png
+Image f4_defocus_00208_t4.png: PSNR 18.583696 SSIM 0.847419 MAE 0.109568 LPIPS 0.403357 Color Delta 3.302983
+./Datasets/new/test/input_crops/f4_defocus_00224_t2.png
+Image f4_defocus_00224_t2.png: PSNR 17.464172 SSIM 0.755278 MAE 0.108803 LPIPS 0.479029 Color Delta 2.996754
+./Datasets/new/test/input_crops/f4_defocus_00270_t3.png
+Image f4_defocus_00270_t3.png: PSNR 18.358653 SSIM 0.818511 MAE 0.081655 LPIPS 0.479994 Color Delta 3.244395
+./Datasets/new/test/input_crops/f4_defocus_00286_t1.png
+./Datasets/new/test/input_crops/f4_defocus_00296_t3.png
+./Datasets/new/test/input_crops/f4_defocus_00298_t2.png
+Image f4_defocus_00298_t2.png: PSNR 18.900237 SSIM 0.517974 MAE 0.067021 LPIPS 0.734260 Color Delta 3.565886
+./Datasets/new/test/input_crops/f4_defocus_00302_t2.png
+./Datasets/new/test/input_crops/f4_defocus_00310_t1.png
+./Datasets/new/test/input_crops/f4_defocus_00332_t1.png
+Image f4_defocus_00332_t1.png: PSNR 19.491054 SSIM 0.394847 MAE 0.076631 LPIPS 0.883974 Color Delta 3.347377
+./Datasets/new/test/input_crops/f4_defocus_00344_t4.png
+./Datasets/new/test/input_crops/f4_defocus_00346_t4.png
+./Datasets/new/test/input_crops/f4_defocus_00366_t1.png
+Image f4_defocus_00366_t1.png: PSNR 18.131459 SSIM 0.723643 MAE 0.095014 LPIPS 0.462380 Color Delta 2.357517
+./Datasets/new/test/input_crops/f4_defocus_00370_t1.png
+./Datasets/new/test/input_crops/f4_defocus_00372_t1.png
+./Datasets/new/test/input_crops/f4_defocus_00372_t2.png
+Image f4_defocus_00372_t2.png: PSNR 20.420532 SSIM 0.688862 MAE 0.074493 LPIPS 0.644268 Color Delta 2.912921
+./Datasets/new/test/input_crops/f4_defocus_00378_t3.png
+Image f4_defocus_00378_t3.png: PSNR 16.716833 SSIM 0.759205 MAE 0.133243 LPIPS 0.440224 Color Delta 4.511858
+./Datasets/new/test/input_crops/f4_defocus_00392_t1.png
+Image f4_defocus_00392_t1.png: PSNR 15.278491 SSIM 0.664049 MAE 0.147733 LPIPS 0.516329 Color Delta 7.586670
+./Datasets/new/test/input_crops/f4_defocus_00436_t2.png
+Image f4_defocus_00436_t2.png: PSNR 15.719683 SSIM 0.663679 MAE 0.141543 LPIPS 0.464920 Color Delta 6.120445
+./Datasets/new/test/input_crops/f4_defocus_00450_t1.png
+Image f4_defocus_00450_t1.png: PSNR 17.612841 SSIM 0.707007 MAE 0.079373 LPIPS 0.501383 Color Delta 2.648787
+./Datasets/new/test/input_crops/f4_defocus_00450_t4.png
+./Datasets/new/test/input_crops/f4_defocus_00458_t3.png
+Image f4_defocus_00458_t3.png: PSNR 18.706218 SSIM 0.700941 MAE 0.089148 LPIPS 0.654905 Color Delta 5.835475
+./Datasets/new/test/input_crops/f5_defocus_00033_t1.png
+./Datasets/new/test/input_crops/f5_defocus_00043_t1.png
+Image f5_defocus_00043_t1.png: PSNR 17.902155 SSIM 0.896183 MAE 0.125283 LPIPS 0.296276 Color Delta 3.714122
+./Datasets/new/test/input_crops/f5_defocus_00043_t3.png
+Image f5_defocus_00043_t3.png: PSNR 16.614962 SSIM 0.858570 MAE 0.127651 LPIPS 0.380070 Color Delta 4.155797
+./Datasets/new/test/input_crops/f5_defocus_00045_t3.png
+./Datasets/new/test/input_crops/f5_defocus_00047_t3.png
+./Datasets/new/test/input_crops/f5_defocus_00069_t2.png
+./Datasets/new/test/input_crops/f5_defocus_00095_t2.png
+Image f5_defocus_00095_t2.png: PSNR 12.909307 SSIM 0.800500 MAE 0.221368 LPIPS 0.436701 Color Delta 4.334280
+./Datasets/new/test/input_crops/f5_defocus_00109_t1.png
+Image f5_defocus_00109_t1.png: PSNR 13.817613 SSIM 0.774331 MAE 0.184050 LPIPS 0.368915 Color Delta 3.427731
+./Datasets/new/test/input_crops/f5_defocus_00153_t4.png
+Image f5_defocus_00153_t4.png: PSNR 15.372007 SSIM 0.704827 MAE 0.154634 LPIPS 0.570724 Color Delta 3.444822
+./Datasets/new/test/input_crops/f5_defocus_00163_t3.png
+Image f5_defocus_00163_t3.png: PSNR 18.996956 SSIM 0.753100 MAE 0.084918 LPIPS 0.533380 Color Delta 1.460980
+./Datasets/new/test/input_crops/f5_defocus_00170_t3.png
+./Datasets/new/test/input_crops/f5_defocus_00172_t1.png
+Image f5_defocus_00172_t1.png: PSNR 17.385745 SSIM 0.851093 MAE 0.119328 LPIPS 0.366392 Color Delta 5.215947
+./Datasets/new/test/input_crops/f5_defocus_00192_t3.png
+Image f5_defocus_00192_t3.png: PSNR 20.312932 SSIM 0.805546 MAE 0.076310 LPIPS 0.353809 Color Delta 1.631229
+./Datasets/new/test/input_crops/f5_defocus_00194_t4.png
+./Datasets/new/test/input_crops/f5_defocus_00206_t3.png
+./Datasets/new/test/input_crops/f5_defocus_00231_t3.png
+Image f5_defocus_00231_t3.png: PSNR 14.258608 SSIM 0.510047 MAE 0.176781 LPIPS 0.723397 Color Delta 3.811917
+./Datasets/new/test/input_crops/f5_defocus_00261_t2.png
+Image f5_defocus_00261_t2.png: PSNR 17.836500 SSIM 0.758117 MAE 0.120698 LPIPS 0.568122 Color Delta 3.811398
+./Datasets/new/test/input_crops/f5_defocus_00307_t2.png
+Image f5_defocus_00307_t2.png: PSNR 13.053383 SSIM 0.772783 MAE 0.208918 LPIPS 0.497275 Color Delta 6.102074
+./Datasets/new/test/input_crops/f5_defocus_00317_t3.png
+Image f5_defocus_00317_t3.png: PSNR 13.739594 SSIM 0.738662 MAE 0.182812 LPIPS 0.373520 Color Delta 5.450688
+./Datasets/new/test/input_crops/f5_defocus_00339_t3.png
+Image f5_defocus_00339_t3.png: PSNR 17.532869 SSIM 0.757178 MAE 0.113965 LPIPS 0.552785 Color Delta 4.367404
+./Datasets/new/test/input_crops/f5_defocus_00365_t2.png
+./Datasets/new/test/input_crops/f5_defocus_00371_t1.png
+Image f5_defocus_00371_t1.png: PSNR 16.614274 SSIM 0.633753 MAE 0.118035 LPIPS 0.647888 Color Delta 5.866592
+./Datasets/new/test/input_crops/f5_defocus_00389_t4.png
+./Datasets/new/test/input_crops/f5_defocus_00399_t3.png
+Image f5_defocus_00399_t3.png: PSNR 15.995048 SSIM 0.456216 MAE 0.119041 LPIPS 0.666932 Color Delta 2.644587
+./Datasets/new/test/input_crops/f5_defocus_00407_t3.png
+Image f5_defocus_00407_t3.png: PSNR 14.640388 SSIM 0.281990 MAE 0.136418 LPIPS 0.861129 Color Delta 5.283067
+./Datasets/new/test/input_crops/f5_defocus_00439_t4.png
+Image f5_defocus_00439_t4.png: PSNR 14.436420 SSIM 0.709768 MAE 0.177058 LPIPS 0.594826 Color Delta 5.123983
+./Datasets/new/test/input_crops/f5_defocus_00483_t3.png
+./Datasets/new/test/input_crops/f5_defocus_00489_t3.png
+Image f5_defocus_00489_t3.png: PSNR 17.297368 SSIM 0.840390 MAE 0.126519 LPIPS 0.324595 Color Delta 4.627520
+./Datasets/new/test/input_crops/f5_defocus_00495_t1.png
+Image f5_defocus_00495_t1.png: PSNR 17.615098 SSIM 0.835363 MAE 0.112900 LPIPS 0.401667 Color Delta 2.138811
+./Datasets/new/test/input_crops/f5_defocus_00508_t4.png
+Image f5_defocus_00508_t4.png: PSNR 18.311273 SSIM 0.656063 MAE 0.093402 LPIPS 0.448493 Color Delta 5.285906
+./Datasets/new/test/input_crops/f5_defocus_00510_t1.png
+Image f5_defocus_00510_t1.png: PSNR 14.611801 SSIM 0.561287 MAE 0.141370 LPIPS 0.664380 Color Delta 4.670483
+./Datasets/new/test/input_crops/f5_defocus_00518_t1.png
+Image f5_defocus_00518_t1.png: PSNR 15.735646 SSIM 0.591614 MAE 0.119943 LPIPS 0.675509 Color Delta 3.033735
+./Datasets/new/test/input_crops/f5_defocus_00520_t3.png
+Image f5_defocus_00520_t3.png: PSNR 16.321501 SSIM 0.653273 MAE 0.130905 LPIPS 0.584080 Color Delta 4.546303
+./Datasets/new/test/input_crops/f5_defocus_00554_t1.png
+Image f5_defocus_00554_t1.png: PSNR 18.259022 SSIM 0.767375 MAE 0.098644 LPIPS 0.487523 Color Delta 2.388332
+./Datasets/new/test/input_crops/f5_defocus_00560_t1.png
+Image f5_defocus_00560_t1.png: PSNR 19.842524 SSIM 0.880025 MAE 0.081189 LPIPS 0.287956 Color Delta 2.155407
+./Datasets/new/test/input_crops/f5_defocus_00560_t4.png
+./Datasets/new/test/input_crops/f5_defocus_00574_t3.png
+Image f5_defocus_00574_t3.png: PSNR 15.541581 SSIM 0.783696 MAE 0.145546 LPIPS 0.545880 Color Delta 3.872912
+Overall: PSNR 19.737547 SSIM 0.697814 MAE 0.090688 LPIPS 0.510901 Color Delta 3.354559

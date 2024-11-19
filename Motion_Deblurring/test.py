@@ -22,7 +22,7 @@ import warnings
 warnings.filterwarnings("ignore")
 
 import kornia.color
-
+import cv2
 import lpips
 alex = lpips.LPIPS(net='alex').cuda()
 
@@ -84,10 +84,11 @@ def delta_e_cie2000_torch(lab1, lab2):
 
 parser = argparse.ArgumentParser(description='Single Image Motion Deblurring using Restormer')
 
-parser.add_argument('--input_dir', default='./Datasets/test/RealBlur-J', type=str, help='Directory of validation images')
-parser.add_argument('--result_dir', default='./results/', type=str, help='Directory for results')
+parser.add_argument('--input_dir', default='./conv_complete/Conv/test', type=str, help='Directory of validation images')
+parser.add_argument('--result_dir', default='./results/conv_compl', type=str, help='Directory for results')
+#parser.add_argument('--weights', default='../archive_experiments_realblurJ/Deblurring_Restormer/models/net_g_latest.pth', type=str, help='Path to weights')
 parser.add_argument('--weights', default='./pretrained_models/motion_deblurring.pth', type=str, help='Path to weights')
-parser.add_argument('--dataset', default='RealBlurJ', type=str, help='Test Dataset') # ['GoPro', 'HIDE', 'RealBlur_J', 'RealBlur_R']
+parser.add_argument('--dataset', default='bench', type=str, help='Test Dataset') # ['GoPro', 'HIDE', 'RealBlur_J', 'RealBlur_R']
 
 args = parser.parse_args()
 
@@ -120,11 +121,11 @@ dataset = args.dataset
 result_dir  = os.path.join(args.result_dir, dataset)
 os.makedirs(result_dir, exist_ok=True)
 
-inp_dir = os.path.join(args.input_dir, 'target')
-tar_dir = os.path.join(args.input_dir, 'input')
+inp_dir = os.path.join(args.input_dir, 'sharp')
+tar_dir = os.path.join(args.input_dir, 'blurry')
 
-filesI = natsorted(glob(os.path.join(inp_dir, '*.png')) + glob(os.path.join(inp_dir, '*.jpg')))
-filesC = natsorted(glob(os.path.join(tar_dir, '*.png')) + glob(os.path.join(tar_dir, '*.jpg')))
+filesI = natsorted(glob(os.path.join(inp_dir, '*_151.png')) + glob(os.path.join(inp_dir, '*_151.jpg')))[:50]
+filesC = natsorted(glob(os.path.join(tar_dir, '*_151.png')) + glob(os.path.join(tar_dir, '*_151.jpg')))[:50]
 
 psnr, mae, ssim, pips = [], [], [], []
 color_diffs = []
@@ -135,7 +136,11 @@ with torch.no_grad():
         torch.cuda.empty_cache()
 
         imgI = np.float32(utils.load_img(fileI))/255.
+        imgI = cv2.resize(imgI, (1280,720), interpolation=cv2.INTER_AREA)
+
         imgC = np.float32(utils.load_img(fileC))/255.
+        imgC = cv2.resize(imgC, (1280,720), interpolation=cv2.INTER_AREA)
+
         imgI = torch.from_numpy(imgI).permute(2,0,1)
         target = torch.from_numpy(imgC).permute(2,0,1)
         input_ = imgI.unsqueeze(0).cuda()
@@ -173,9 +178,9 @@ with torch.no_grad():
             print("Image {}: PSNR {:4f} SSIM {:4f} MAE {:4f} LPIPS {:4f} Color Delta {:4f}".format(fileC.split("/")[-1], (utils.PSNR(imgC, restored)), (utils.SSIM(imgC, restored)), (utils.MAE(imgC, restored)), (psps), delta_e_cie2000))
             save_file = os.path.join(result_dir, "bad", os.path.split(fileC)[-1])
             restored = np.uint8((restored*255).round())
-            utils.save_img(save_file, restored)
+            #utils.save_img(save_file, restored)
 
-        if utils.PSNR(imgC, restored) >= 33:
+        if utils.PSNR(imgC, restored) >= 30:
             print("Image {}: PSNR {:4f} SSIM {:4f} MAE {:4f} LPIPS {:4f} Color Delta {:4f}".format(fileC.split("/")[-1], (utils.PSNR(imgC, restored)), (utils.SSIM(imgC, restored)), (utils.MAE(imgC, restored)), (psps), delta_e_cie2000))
             save_file = os.path.join(result_dir, "good", os.path.split(fileC)[-1])
             restored = np.uint8((restored*255).round())

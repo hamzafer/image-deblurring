@@ -13,6 +13,12 @@ from tqdm import tqdm
 from pdb import set_trace as stx
 from joblib import Parallel, delayed
 import multiprocessing
+import shutil
+import random
+from pathlib import Path
+import numpy as np
+import warnings
+warnings.filterwarnings('ignore')
 
 def train_files(file_):
     lr_file, hr_file = file_
@@ -72,8 +78,37 @@ patch_size = 512
 overlap = 256
 p_max = 0
 
-src = 'Datasets/train/GoPro'
-tar = 'Datasets/GoPro/train'
+src = 'Datasets/RealBlur-J'
+
+blur_images = sorted(glob(os.path.join(src, 'input', '*.png')) + glob(os.path.join(src, 'input', '*.jpg')))
+pairs = []
+
+for blur_img in blur_images:
+    # Get the corresponding gt image
+    number = blur_img.split('blur_')[1]
+    gt_img = f'gt_{number}'
+    
+    # Verify that both images exist
+    if os.path.exists(os.path.join(os.path.join(src, 'target'), gt_img)):
+        pairs.append((blur_img, os.path.join(os.path.join(src, 'target'), gt_img)))
+
+# Shuffle the pairs
+random.seed(42)  # For reproducibility
+random.shuffle(pairs)
+
+# Split into train and validation
+n_train = int(len(pairs) * 0.85)
+train_pairs = pairs[:n_train]
+val_pairs = pairs[n_train:]
+
+# Print statistics
+print(pairs[:10])
+print(f"Total image pairs: {len(pairs)}")
+print(f"Training pairs: {len(train_pairs)}")
+print(f"Validation pairs: {len(val_pairs)}")
+
+
+tar = 'Datasets/train/RealBlur-J'
 
 lr_tar = os.path.join(tar, 'input_crops')
 hr_tar = os.path.join(tar, 'target_crops')
@@ -81,18 +116,18 @@ hr_tar = os.path.join(tar, 'target_crops')
 os.makedirs(lr_tar, exist_ok=True)
 os.makedirs(hr_tar, exist_ok=True)
 
-lr_files = natsorted(glob(os.path.join(src, 'input', '*.png')) + glob(os.path.join(src, 'input', '*.jpg')))
-hr_files = natsorted(glob(os.path.join(src, 'target', '*.png')) + glob(os.path.join(src, 'target', '*.jpg')))
+# lr_files = natsorted(glob(os.path.join(src, 'input', '*.png')) + glob(os.path.join(src, 'input', '*.jpg')))
+# hr_files = natsorted(glob(os.path.join(src, 'target', '*.png')) + glob(os.path.join(src, 'target', '*.jpg')))
 
-files = [(i, j) for i, j in zip(lr_files, hr_files)]
+# files = [(i, j) for i, j in zip(lr_files, hr_files)]
 
-Parallel(n_jobs=num_cores)(delayed(train_files)(file_) for file_ in tqdm(files))
+Parallel(n_jobs=num_cores)(delayed(train_files)(file_) for file_ in tqdm(train_pairs))
 
 
-############ Prepare validation data ####################
+# ############ Prepare validation data ####################
 val_patch_size = 256
-src = 'Datasets/test/GoPro'
-tar = 'Datasets/GoPro/val'
+
+tar = 'Datasets/val/RealBlur-J'
 
 lr_tar = os.path.join(tar, 'input_crops')
 hr_tar = os.path.join(tar, 'target_crops')
@@ -100,9 +135,9 @@ hr_tar = os.path.join(tar, 'target_crops')
 os.makedirs(lr_tar, exist_ok=True)
 os.makedirs(hr_tar, exist_ok=True)
 
-lr_files = natsorted(glob(os.path.join(src, 'input', '*.png')) + glob(os.path.join(src, 'input', '*.jpg')))
-hr_files = natsorted(glob(os.path.join(src, 'target', '*.png')) + glob(os.path.join(src, 'target', '*.jpg')))
+# lr_files = natsorted(glob(os.path.join(src, 'input', '*.png')) + glob(os.path.join(src, 'input', '*.jpg')))
+# hr_files = natsorted(glob(os.path.join(src, 'target', '*.png')) + glob(os.path.join(src, 'target', '*.jpg')))
 
-files = [(i, j) for i, j in zip(lr_files, hr_files)]
+# files = [(i, j) for i, j in zip(lr_files, hr_files)]
 
-Parallel(n_jobs=num_cores)(delayed(val_files)(file_) for file_ in tqdm(files))
+Parallel(n_jobs=num_cores)(delayed(val_files)(file_) for file_ in tqdm(val_pairs))

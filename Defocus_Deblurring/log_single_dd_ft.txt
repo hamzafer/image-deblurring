@@ -1,0 +1,3 @@
+Setting up [LPIPS] perceptual loss: trunk [alex], v[0.1], spatial [off]
+Loading model from: /home/user1/miniconda3/envs/pytorch181/lib/python3.7/site-packages/lpips/weights/v0.1/alex.pth
+===>Testing using weights:  ./pretrained_models/net_g_latest.pth

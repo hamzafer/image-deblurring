@@ -93,15 +93,15 @@ alex = lpips.LPIPS(net='alex').cuda()
 
 parser = argparse.ArgumentParser(description='Single Image Defocus Deblurring using Restormer')
 
-parser.add_argument('--input_dir', default='./Datasets/Downloads/DPDD/test', type=str, help='Directory of validation images')
-parser.add_argument('--result_dir', default='./results/Single_Image_Defocus_Deblurring/', type=str, help='Directory for results')
-parser.add_argument('--weights', default='./pretrained_models/single_image_defocus_deblurring.pth', type=str, help='Path to weights')
+parser.add_argument('--input_dir', default='./Datasets/new/test', type=str, help='Directory of validation images')
+parser.add_argument('--result_dir', default='./results/resized/', type=str, help='Directory for results')
+parser.add_argument('--weights', default='./pretrained_models/net_g_latest_res.pth', type=str, help='Path to weights')
 parser.add_argument('--save_images', action='store_true', help='Save denoised images in result directory')
 
-args = parser.parse_args()
+args = parser.parse_args() 
 
 ####### Load yaml #######
-yaml_file = 'Options/DefocusDeblur_Single_8bit_Restormer.yml'
+yaml_file = 'Options/test.yml'
 import yaml
 
 try:
@@ -127,20 +127,22 @@ result_dir = args.result_dir
 if args.save_images:
     os.makedirs(result_dir, exist_ok=True)
 
-filesI = natsorted(glob(os.path.join(args.input_dir, 'inputC', '*.png')))
-filesC = natsorted(glob(os.path.join(args.input_dir, 'target', '*.png')))
+filesI = natsorted(glob(os.path.join(args.input_dir, 'input_crops', '*.png')))
+filesC = natsorted(glob(os.path.join(args.input_dir, 'target_crops', '*.png')))
 
-indoor_labels  = np.load('./Datasets/Downloads/DPDD/test/indoor_labels.npy')
-outdoor_labels = np.load('./Datasets/Downloads/DPDD/test/outdoor_labels.npy')
+#indoor_labels  = np.load('./Datasets/Downloads/DPDD/test/indoor_labels.npy')
+#outdoor_labels = np.load('./Datasets/Downloads/DPDD/test/outdoor_labels.npy')
 
 psnr, mae, ssim, pips = [], [], [], []
 color_diffs = []
 
 with torch.no_grad():
     for fileI, fileC in tqdm(zip(filesI, filesC), total=len(filesC)):
-
+        print(fileI)
         imgI = np.float32(utils.load_img(fileI))/255.
+        imgI = cv2.resize(imgI, (1680 , 1120), interpolation=cv2.INTER_AREA)
         imgC = np.float32(utils.load_img(fileC))/255.
+        imgC = cv2.resize(imgC, (1680 , 1120), interpolation=cv2.INTER_AREA)
 
         patchI = torch.from_numpy(imgI).unsqueeze(0).permute(0,3,1,2).cuda()
         patchC = torch.from_numpy(imgC).unsqueeze(0).permute(0,3,1,2).cuda()
@@ -162,24 +164,24 @@ with torch.no_grad():
 
         if utils.PSNR(imgC, restored) <= 20.5 :
             print("Image {}: PSNR {:4f} SSIM {:4f} MAE {:4f} LPIPS {:4f} Color Delta {:4f}".format(fileC.split("/")[-1], (utils.PSNR(imgC, restored)), (utils.SSIM(imgC, restored)), (utils.MAE(imgC, restored)), (psps), delta_e_cie2000))
-            save_file = os.path.join(result_dir, "bad", os.path.split(fileC)[-1])
+            save_file = os.path.join(result_dir, "ft_bad", os.path.split(fileC)[-1])
             restored = np.uint8((restored*255).round())
             utils.save_img(save_file, restored)
 
         if utils.PSNR(imgC, restored) >=30:
             print("Image {}: PSNR {:4f} SSIM {:4f} MAE {:4f} LPIPS {:4f} Color Delta {:4f}".format(fileC.split("/")[-1], (utils.PSNR(imgC, restored)), (utils.SSIM(imgC, restored)), (utils.MAE(imgC, restored)), (psps), delta_e_cie2000))
-            save_file = os.path.join(result_dir, "good", os.path.split(fileC)[-1])
+            save_file = os.path.join(result_dir, "ft_good", os.path.split(fileC)[-1])
             restored = np.uint8((restored*255).round())
             utils.save_img(save_file, restored)
 
 psnr, mae, ssim, pips = np.array(psnr), np.array(mae), np.array(ssim), np.array(pips)
 color_diffs = np.array(color_diffs)
 
-psnr_indoor, mae_indoor, ssim_indoor, pips_indoor = psnr[indoor_labels-1], mae[indoor_labels-1], ssim[indoor_labels-1], pips[indoor_labels-1]
-psnr_outdoor, mae_outdoor, ssim_outdoor, pips_outdoor = psnr[outdoor_labels-1], mae[outdoor_labels-1], ssim[outdoor_labels-1], pips[outdoor_labels-1]
-color_diffs_indoor = color_diffs[indoor_labels-1]
-color_diffs_outdoor = color_diffs[outdoor_labels-1]
+#psnr_indoor, mae_indoor, ssim_indoor, pips_indoor = psnr[indoor_labels-1], mae[indoor_labels-1], ssim[indoor_labels-1], pips[indoor_labels-1]
+#psnr_outdoor, mae_outdoor, ssim_outdoor, pips_outdoor = psnr[outdoor_labels-1], mae[outdoor_labels-1], ssim[outdoor_labels-1], pips[outdoor_labels-1]
+#color_diffs_indoor = color_diffs[indoor_labels-1]
+#color_diffs_outdoor = color_diffs[outdoor_labels-1]
 
 print("Overall: PSNR {:4f} SSIM {:4f} MAE {:4f} LPIPS {:4f} Color Delta {:4f}".format(np.mean(psnr), np.mean(ssim), np.mean(mae), np.mean(pips), np.mean(color_diffs)))
-print("Indoor:  PSNR {:4f} SSIM {:4f} MAE {:4f} LPIPS {:4f} Color Delta {:4f}".format(np.mean(psnr_indoor), np.mean(ssim_indoor), np.mean(mae_indoor), np.mean(pips_indoor), np.mean(color_diffs_indoor)))
-print("Outdoor: PSNR {:4f} SSIM {:4f} MAE {:4f} LPIPS {:4f} Color Delta {:4f}".format(np.mean(psnr_outdoor), np.mean(ssim_outdoor), np.mean(mae_outdoor), np.mean(pips_outdoor), np.mean(color_diffs_outdoor)))
+#print("Indoor:  PSNR {:4f} SSIM {:4f} MAE {:4f} LPIPS {:4f} Color Delta {:4f}".format(np.mean(psnr_indoor), np.mean(ssim_indoor), np.mean(mae_indoor), np.mean(pips_indoor), np.mean(color_diffs_indoor)))
+#print("Outdoor: PSNR {:4f} SSIM {:4f} MAE {:4f} LPIPS {:4f} Color Delta {:4f}".format(np.mean(psnr_outdoor), np.mean(ssim_outdoor), np.mean(mae_outdoor), np.mean(pips_outdoor), np.mean(color_diffs_outdoor)))

@@ -1,6 +1,6 @@
 # general settings
-name: DefocusDeblur_Single_Image_FineTune
-model_type: ImageCleanModel
+name: MotionBlur_Restormer2
+model_type: ReversibleRestormerModel
 scale: 1
 num_gpu: 1  # set num_gpu: 0 for cpu mode
 manual_seed: 100
@@ -10,8 +10,8 @@ datasets:
   train:
     name: TrainSet
     type: Dataset_PairedImage
-    dataroot_gt: ./Defocus_Deblurring/Datasets/LSD/train/target_crops
-    dataroot_lq: ./Defocus_Deblurring/Datasets/LSD/train/input_crops
+    dataroot_gt: ./Motion_Deblurring/Datasets/GoPro/train/target_crops
+    dataroot_lq: ./Motion_Deblurring/Datasets/GoPro/train/input_crops
     geometric_augs: true
 
     filename_tmpl: '{}'
@@ -24,9 +24,9 @@ datasets:
     batch_size_per_gpu: 8
 
     ### -------------Progressive training--------------------------
-    mini_batch_sizes: [6,4,4,2,1,1]             # Batch size per gpu   
+    mini_batch_sizes: [4,4,2,2,1,1]             # Batch size per gpu   
     iters: [92000,64000,48000,36000,36000,24000]
-    gt_size: 256   # Max patch size for progressive training
+    gt_size: 384   # Max patch size for progressive training
     gt_sizes: [128,160,192,256,320,384]  # Patch sizes for progressive training.
     ### ------------------------------------------------------------
 
@@ -43,14 +43,14 @@ datasets:
   val:
     name: ValSet
     type: Dataset_PairedImage
-    dataroot_gt: ./Defocus_Deblurring/Datasets/LSD/val/target_crops
-    dataroot_lq: ./Defocus_Deblurring/Datasets/LSD/val/input_crops
+    dataroot_gt: ./Motion_Deblurring/Datasets/GoPro/val/target_crops
+    dataroot_lq: ./Motion_Deblurring/Datasets/GoPro/val/input_crops
     io_backend:
       type: disk
 
 # network structures
 network_g:
-  type: Restormer
+  type: ReversibleRestormer
   inp_channels: 3
   out_channels: 3
   dim: 48
@@ -65,13 +65,13 @@ network_g:
 
 # path
 path:
-  pretrain_network_g: './Defocus_Deblurring/pretrained_models/single_image_defocus_deblurring.pth'
+  pretrain_network_g: ~
   strict_load_g: true
   resume_state: ~
 
 # training settings
 train:
-  total_iter: 100000
+  total_iter: 300000
   warmup_iter: -1 # no warm up
   use_grad_clip: true
 
@@ -80,9 +80,9 @@ train:
   # 2nd cycle: cosine annealing (3e-4 to 1e-6) for 208k iters.
   scheduler:
     type: CosineAnnealingRestartCyclicLR
-    periods: [10000, 50000, 75000]       
-    restart_weights: [1, 1, 1]
-    eta_mins: [0.0001,0.00001, 0.000001] 
+    periods: [92000, 208000]       
+    restart_weights: [1,1]
+    eta_mins: [0.0003,0.000001]   
   
   mixing_augs:
     mixup: false
@@ -91,7 +91,7 @@ train:
 
   optim_g:
     type: AdamW
-    lr: !!float 1e-3
+    lr: !!float 3e-4
     weight_decay: !!float 1e-4
     betas: [0.9, 0.999]
   
@@ -107,7 +107,7 @@ val:
   val_freq: !!float 4e3
   save_img: false
   rgb2bgr: true
-  use_image: false
+  use_image: true
   max_minibatch: 8
 
   metrics:
@@ -115,12 +115,10 @@ val:
       type: calculate_psnr
       crop_border: 0
       test_y_channel: false
-    ssim:
+    ssim: # metric name, can be arbitrary
       type: calculate_ssim
       crop_border: 0
       test_y_channel: false
-
-
 # logging settings
 logger:
   print_freq: 1000
@@ -134,3 +132,4 @@ logger:
 dist_params:
   backend: nccl
   port: 29500
+  
