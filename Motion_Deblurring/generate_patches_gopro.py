@@ -86,7 +86,7 @@ hr_files = natsorted(glob(os.path.join(src, 'target', '*.png')) + glob(os.path.j
 
 files = [(i, j) for i, j in zip(lr_files, hr_files)]
 
-Parallel(n_jobs=num_cores)(delayed(train_files)(file_) for file_ in tqdm(files))
+#Parallel(n_jobs=num_cores)(delayed(train_files)(file_) for file_ in tqdm(files))
 
 
 ############ Prepare validation data ####################
