@@ -1,30 +1,29 @@
-## Restormer: Efficient Transformer for High-Resolution Image Restoration
-## Syed Waqas Zamir, Aditya Arora, Salman Khan, Munawar Hayat, Fahad Shahbaz Khan, and Ming-Hsuan Yang
-## https://arxiv.org/abs/2111.09881
-
-
 import numpy as np
 import os
 import argparse
 from tqdm import tqdm
-
+import time
 import torch.nn as nn
 import torch
 import torch.nn.functional as F
 import utils
-
 from natsort import natsorted
 from glob import glob
 from basicsr.models.archs.restormer_arch import Restormer
 from skimage import img_as_ubyte
-from pdb import set_trace as stx
 import warnings
 warnings.filterwarnings("ignore")
-
 import kornia.color
 import cv2
 import lpips
+import logging
+
+# Set up LPIPS and logging
 alex = lpips.LPIPS(net='alex').cuda()
+run_timestamp = time.strftime("%Y-%m-%d_%H-%M-%S")
+log_file = f"./inference/logs/inference_run_{run_timestamp}.log"
+os.makedirs(os.path.dirname(log_file), exist_ok=True)
+logging.basicConfig(filename=log_file, level=logging.INFO, format='%(asctime)s - %(message)s')
 
 def delta_e_cie2000_torch(lab1, lab2):
     """
@@ -109,16 +108,25 @@ model_restoration = Restormer(**x['network_g'])
 
 checkpoint = torch.load(args.weights)
 model_restoration.load_state_dict(checkpoint['params'])
-print("===>Testing using weights: ",args.weights)
+logging.info(f"Testing using weights: {args.weights}")
 model_restoration.cuda()
 model_restoration = nn.DataParallel(model_restoration)
 model_restoration.eval()
 
-
 factor = 8
 dataset = args.dataset
-result_dir  = os.path.join(args.result_dir, dataset)
+result_dir = os.path.join(args.result_dir, dataset)
 os.makedirs(result_dir, exist_ok=True)
+
+# Directories for categories
+good_dir = os.path.join(result_dir, "good")
+bad_dir = os.path.join(result_dir, "bad")
+neutral_dir = os.path.join(result_dir, "neutral")
+all_dir = os.path.join(result_dir, "all")
+os.makedirs(good_dir, exist_ok=True)
+os.makedirs(bad_dir, exist_ok=True)
+os.makedirs(neutral_dir, exist_ok=True)
+os.makedirs(all_dir, exist_ok=True)
 
 inp_dir = os.path.join(args.input_dir, 'input')
 tar_dir = os.path.join(args.input_dir, 'target')
@@ -126,69 +134,87 @@ tar_dir = os.path.join(args.input_dir, 'target')
 filesI = natsorted(glob(os.path.join(inp_dir, '*.png')) + glob(os.path.join(inp_dir, '*.jpg')))
 filesC = natsorted(glob(os.path.join(tar_dir, '*.png')) + glob(os.path.join(tar_dir, '*.jpg')))
 
+logging.info(f"Found {len(filesI)} input images and {len(filesC)} target images.")
 psnr, mae, ssim, pips = [], [], [], []
 color_diffs = []
 
+# Start inference
 with torch.no_grad():
     try:
         for fileI, fileC in tqdm(zip(filesI, filesC), total=len(filesC)):
+            filename = os.path.basename(fileI)
+            result_path = os.path.join(all_dir, filename)
+            if os.path.exists(result_path):
+                logging.info(f"Skipping already processed file: {filename}")
+                continue
+
             torch.cuda.ipc_collect()
             torch.cuda.empty_cache()
 
-            imgI = np.float32(utils.load_img(fileI))/255.
-            imgI = cv2.resize(imgI, (1280,720), interpolation=cv2.INTER_AREA)
+            imgI = np.float32(utils.load_img(fileI)) / 255.0
+            imgI = cv2.resize(imgI, (1280, 720), interpolation=cv2.INTER_AREA)
 
-            imgC = np.float32(utils.load_img(fileC))/255.
-            imgC = cv2.resize(imgC, (1280,720), interpolation=cv2.INTER_AREA)
+            imgC = np.float32(utils.load_img(fileC)) / 255.0
+            imgC = cv2.resize(imgC, (1280, 720), interpolation=cv2.INTER_AREA)
 
-            imgI = torch.from_numpy(imgI).permute(2,0,1)
-            target = torch.from_numpy(imgC).permute(2,0,1)
+            imgI = torch.from_numpy(imgI).permute(2, 0, 1)
+            target = torch.from_numpy(imgC).permute(2, 0, 1)
             input_ = imgI.unsqueeze(0).cuda()
             target = target.unsqueeze(0).cuda()
 
             # Padding in case images are not multiples of 8
-            h,w = input_.shape[2], input_.shape[3]
-            H,W = ((h+factor)//factor)*factor, ((w+factor)//factor)*factor
-            padh = H-h if h%factor!=0 else 0
-            padw = W-w if w%factor!=0 else 0
-            input_ = F.pad(input_, (0,padw,0,padh), 'reflect')
-            #target = F.pad(target, (0,padw,0,padh), 'reflect')
+            h, w = input_.shape[2], input_.shape[3]
+            H, W = ((h + factor) // factor) * factor, ((w + factor) // factor) * factor
+            padh = H - h if h % factor != 0 else 0
+            padw = W - w if w % factor != 0 else 0
+            input_ = F.pad(input_, (0, padw, 0, padh), 'reflect')
 
             restored = model_restoration(input_)
 
             # Unpad images to original dimensions
-            restored = restored[:,:,:h,:w]
+            restored = restored[:, :, :h, :w]
 
-            restored = torch.clamp(restored,0,1)
+            restored = torch.clamp(restored, 0, 1)
             psps = alex(target, restored, normalize=True).item()
-            pips.append(alex(target, restored, normalize=True).item())
+            pips.append(psps)
 
             delta_e_cie2000 = delta_e_cie2000_torch(target, restored)
             delta_e_cie2000 = delta_e_cie2000.mean().item()
             color_diffs.append(delta_e_cie2000)
 
-            restored = restored.cpu().detach().permute(0, 2, 3,1).squeeze(0).numpy()
-            
+            restored = restored.cpu().detach().permute(0, 2, 3, 1).squeeze(0).numpy()
+            restored_uint8 = np.uint8((restored * 255).round())
 
-            psnr.append(utils.PSNR(imgC, restored))
-            mae.append(utils.MAE(imgC, restored))
-            ssim.append(utils.SSIM(imgC, restored))
+            # Save the restored image in "all" directory
+            all_result_path = os.path.join(all_dir, filename)
+            utils.save_img(all_result_path, restored_uint8)
 
-            if utils.PSNR(imgC, restored) <= 20 :
-                print("Image {}: PSNR {:4f} SSIM {:4f} MAE {:4f} LPIPS {:4f} Color Delta {:4f}".format(fileC.split("/")[-1], (utils.PSNR(imgC, restored)), (utils.SSIM(imgC, restored)), (utils.MAE(imgC, restored)), (psps), delta_e_cie2000))
-                save_file = os.path.join(result_dir, "bad", os.path.split(fileC)[-1])
-                restored = np.uint8((restored*255).round())
-                #utils.save_img(save_file, restored)
+            # Calculate metrics
+            psnr_value = utils.PSNR(imgC, restored)
+            mae_value = utils.MAE(imgC, restored)
+            ssim_value = utils.SSIM(imgC, restored)
+            psnr.append(psnr_value)
+            mae.append(mae_value)
+            ssim.append(ssim_value)
 
-            if utils.PSNR(imgC, restored) >= 30:
-                print("Image {}: PSNR {:4f} SSIM {:4f} MAE {:4f} LPIPS {:4f} Color Delta {:4f}".format(fileC.split("/")[-1], (utils.PSNR(imgC, restored)), (utils.SSIM(imgC, restored)), (utils.MAE(imgC, restored)), (psps), delta_e_cie2000))
-                save_file = os.path.join(result_dir, "good", os.path.split(fileC)[-1])
-                restored = np.uint8((restored*255).round())
-                utils.save_img(save_file, restored)
+            # Categorize results
+            metrics_suffix = f"_PSNR{psnr_value:.2f}_SSIM{ssim_value:.2f}_MAE{mae_value:.2f}_LPIPS{psps:.2f}_DeltaE{delta_e_cie2000:.2f}"
+            if psnr_value <= 20:
+                save_path = os.path.join(bad_dir, f"{filename}{metrics_suffix}.png")
+                utils.save_img(save_path, restored_uint8)
+            elif psnr_value >= 30:
+                save_path = os.path.join(good_dir, f"{filename}{metrics_suffix}.png")
+                utils.save_img(save_path, restored_uint8)
+            else:
+                save_path = os.path.join(neutral_dir, f"{filename}{metrics_suffix}.png")
+                utils.save_img(save_path, restored_uint8)
+
+        logging.info("Inference completed successfully.")
+
     except Exception as e:
-        print(e)
+        logging.error(f"Error during inference: {e}")
 
-psnr, mae, ssim, pips = np.array(psnr), np.array(mae), np.array(ssim), np.array(pips)
-color_diffs = np.array(color_diffs)
-
-print("Overall: PSNR {:4f} SSIM {:4f} MAE {:4f} LPIPS {:4f} Color Delta {:4f}".format(np.mean(psnr), np.mean(ssim), np.mean(mae), np.mean(pips), np.mean(color_diffs)))
+# Save overall metrics
+psnr, mae, ssim, pips, color_diffs = map(np.array, [psnr, mae, ssim, pips, color_diffs])
+logging.info(f"Overall Metrics - PSNR: {np.mean(psnr):.4f}, SSIM: {np.mean(ssim):.4f}, "
+             f"MAE: {np.mean(mae):.4f}, LPIPS: {np.mean(pips):.4f}, DeltaE: {np.mean(color_diffs):.4f}")
