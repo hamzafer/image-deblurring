@@ -67,8 +67,8 @@ yaml_file = './inference/Options/Deblurring_Restormer.yml'
 
 # Arguments
 weights_path = './inference/models/initial_pretrained/motion/motion_deblurring.pth'
-input_dir_path = './inference/dataset/motion/testrealblur/RealBlur-J'
-result_base_dir = './inference/results/motion/testrealblur/RealBlur-J'
+input_dir_path = './inference/dataset/motion/testrealblur/RealBlur-R'
+result_base_dir = './inference/results/motion/testrealblur/RealBlur-R'
 
 model_name = os.path.basename(weights_path).replace(".pth", "")
 dataset_name = os.path.basename(os.path.normpath(input_dir_path))
@@ -162,10 +162,10 @@ with torch.no_grad():
             torch.cuda.empty_cache()
 
             imgI = np.float32(utils.load_img(fileI)) / 255.0
-            imgI = cv2.resize(imgI, (1280, 720), interpolation=cv2.INTER_AREA)
+            # imgI = cv2.resize(imgI, (1280, 720), interpolation=cv2.INTER_AREA)
 
             imgC = np.float32(utils.load_img(fileC)) / 255.0
-            imgC = cv2.resize(imgC, (1280, 720), interpolation=cv2.INTER_AREA)
+            # imgC = cv2.resize(imgC, (1280, 720), interpolation=cv2.INTER_AREA)
 
             imgI = torch.from_numpy(imgI).permute(2, 0, 1).unsqueeze(0).cuda()
             target = torch.from_numpy(imgC).permute(2, 0, 1).unsqueeze(0).cuda()
