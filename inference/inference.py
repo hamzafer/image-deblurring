@@ -12,18 +12,14 @@ from glob import glob
 from basicsr.models.archs.restormer_arch import Restormer
 from skimage import img_as_ubyte
 import warnings
-warnings.filterwarnings("ignore")
 import kornia.color
 import cv2
 import lpips
 import logging
+import csv
+import yaml
 
-# Set up LPIPS and logging
-alex = lpips.LPIPS(net='alex').cuda()
-run_timestamp = time.strftime("%Y-%m-%d_%H-%M-%S")
-log_file = f"./inference/logs/inference_run_{run_timestamp}.log"
-os.makedirs(os.path.dirname(log_file), exist_ok=True)
-logging.basicConfig(filename=log_file, level=logging.INFO, format='%(asctime)s - %(message)s')
+warnings.filterwarnings("ignore")
 
 def delta_e_cie2000_torch(lab1, lab2):
     """
@@ -80,8 +76,7 @@ def delta_e_cie2000_torch(lab1, lab2):
 
     return delta_e
 
-
-# Input directory (sharp and blurry images)
+# Argument Parser
 parser = argparse.ArgumentParser(description='Single Image Motion Deblurring using Restormer')
 parser.add_argument('--input_dir', default='./inference/dataset/motion/testrealblur/RealBlur-R', type=str, help='Directory of validation images')
 parser.add_argument('--result_dir', default='./inference/results/motion/testrealblur/RealBlur-R', type=str, help='Directory for results')
@@ -90,9 +85,21 @@ parser.add_argument('--dataset', default='RealBlur-R', type=str, help='Test Data
 
 args = parser.parse_args()
 
-yaml_file = './inference/Options/Deblurring_Restormer.yml'
+# LPIPS Model
+alex = lpips.LPIPS(net='alex').cuda()
 
-import yaml
+# Logging Setup
+model_name = os.path.basename(args.weights).replace(".pth", "")
+log_dir = f"./inference/logs/{model_name}_{args.dataset}"
+os.makedirs(log_dir, exist_ok=True)
+log_file = os.path.join(log_dir, f"inference_run_{time.strftime('%Y-%m-%d_%H-%M-%S')}.log")
+logging.basicConfig(filename=log_file, level=logging.INFO, format='%(asctime)s - %(message)s')
+
+# Metrics CSV Setup
+csv_file = os.path.join(log_dir, f"metrics_{model_name}_{args.dataset}.csv")
+csv_headers = ['Image', 'PSNR', 'SSIM', 'MAE', 'LPIPS', 'DeltaE', 'Category']
+
+yaml_file = './inference/Options/Deblurring_Restormer.yml'
 
 try:
     from yaml import CLoader as Loader
@@ -100,7 +107,6 @@ except ImportError:
     from yaml import Loader
 
 x = yaml.load(open(yaml_file, mode='r'), Loader=Loader)
-
 s = x['network_g'].pop('type')
 ##########################
 
@@ -108,17 +114,17 @@ model_restoration = Restormer(**x['network_g'])
 
 checkpoint = torch.load(args.weights)
 model_restoration.load_state_dict(checkpoint['params'])
-logging.info(f"Testing using weights: {args.weights}")
+logging.info(f"Testing using model: {model_name}, dataset: {args.dataset}")
 model_restoration.cuda()
 model_restoration = nn.DataParallel(model_restoration)
 model_restoration.eval()
 
+# Directories Setup
 factor = 8
 dataset = args.dataset
 result_dir = os.path.join(args.result_dir, dataset)
 os.makedirs(result_dir, exist_ok=True)
 
-# Directories for categories
 good_dir = os.path.join(result_dir, "good")
 bad_dir = os.path.join(result_dir, "bad")
 neutral_dir = os.path.join(result_dir, "neutral")
@@ -135,10 +141,15 @@ filesI = natsorted(glob(os.path.join(inp_dir, '*.png')) + glob(os.path.join(inp_
 filesC = natsorted(glob(os.path.join(tar_dir, '*.png')) + glob(os.path.join(tar_dir, '*.jpg')))
 
 logging.info(f"Found {len(filesI)} input images and {len(filesC)} target images.")
-psnr, mae, ssim, pips = [], [], [], []
-color_diffs = []
 
-# Start inference
+psnr, mae, ssim, pips, color_diffs = [], [], [], [], []
+
+# Write CSV Header
+with open(csv_file, mode='w', newline='') as f:
+    writer = csv.writer(f)
+    writer.writerow(csv_headers)
+
+# Start Inference
 with torch.no_grad():
     try:
         for fileI, fileC in tqdm(zip(filesI, filesC), total=len(filesC)):
@@ -173,48 +184,45 @@ with torch.no_grad():
 
             # Unpad images to original dimensions
             restored = restored[:, :, :h, :w]
-
             restored = torch.clamp(restored, 0, 1)
             psps = alex(target, restored, normalize=True).item()
-            pips.append(psps)
 
             delta_e_cie2000 = delta_e_cie2000_torch(target, restored)
             delta_e_cie2000 = delta_e_cie2000.mean().item()
-            color_diffs.append(delta_e_cie2000)
 
             restored = restored.cpu().detach().permute(0, 2, 3, 1).squeeze(0).numpy()
             restored_uint8 = np.uint8((restored * 255).round())
 
-            # Save the restored image in "all" directory
-            all_result_path = os.path.join(all_dir, filename)
+            # Save the restored image with metrics
+            metrics_suffix = f"_PSNR{utils.PSNR(imgC, restored):.2f}_SSIM{utils.SSIM(imgC, restored):.2f}_MAE{utils.MAE(imgC, restored):.2f}_LPIPS{psps:.2f}_DeltaE{delta_e_cie2000:.2f}"
+            all_result_path = os.path.join(all_dir, f"{filename}{metrics_suffix}.png")
             utils.save_img(all_result_path, restored_uint8)
 
-            # Calculate metrics
-            psnr_value = utils.PSNR(imgC, restored)
-            mae_value = utils.MAE(imgC, restored)
-            ssim_value = utils.SSIM(imgC, restored)
-            psnr.append(psnr_value)
-            mae.append(mae_value)
-            ssim.append(ssim_value)
-
             # Categorize results
-            metrics_suffix = f"_PSNR{psnr_value:.2f}_SSIM{ssim_value:.2f}_MAE{mae_value:.2f}_LPIPS{psps:.2f}_DeltaE{delta_e_cie2000:.2f}"
-            if psnr_value <= 20:
-                save_path = os.path.join(bad_dir, f"{filename}{metrics_suffix}.png")
-                utils.save_img(save_path, restored_uint8)
-            elif psnr_value >= 30:
-                save_path = os.path.join(good_dir, f"{filename}{metrics_suffix}.png")
-                utils.save_img(save_path, restored_uint8)
-            else:
-                save_path = os.path.join(neutral_dir, f"{filename}{metrics_suffix}.png")
-                utils.save_img(save_path, restored_uint8)
+            psnr_value = utils.PSNR(imgC, restored)
+            category = "good" if psnr_value >= 30 else "bad" if psnr_value <= 20 else "neutral"
+            category_dir = good_dir if category == "good" else bad_dir if category == "bad" else neutral_dir
+            category_result_path = os.path.join(category_dir, f"{filename}{metrics_suffix}.png")
+            utils.save_img(category_result_path, restored_uint8)
+
+            # Store metrics in CSV
+            with open(csv_file, mode='a', newline='') as f:
+                writer = csv.writer(f)
+                writer.writerow([filename, psnr_value, utils.SSIM(imgC, restored), utils.MAE(imgC, restored), psps, delta_e_cie2000, category])
+
+            # Append to summary metrics
+            psnr.append(psnr_value)
+            mae.append(utils.MAE(imgC, restored))
+            ssim.append(utils.SSIM(imgC, restored))
+            pips.append(psps)
+            color_diffs.append(delta_e_cie2000)
 
         logging.info("Inference completed successfully.")
 
     except Exception as e:
         logging.error(f"Error during inference: {e}")
 
-# Save overall metrics
+# Log Overall Metrics
 psnr, mae, ssim, pips, color_diffs = map(np.array, [psnr, mae, ssim, pips, color_diffs])
 logging.info(f"Overall Metrics - PSNR: {np.mean(psnr):.4f}, SSIM: {np.mean(ssim):.4f}, "
              f"MAE: {np.mean(mae):.4f}, LPIPS: {np.mean(pips):.4f}, DeltaE: {np.mean(color_diffs):.4f}")
