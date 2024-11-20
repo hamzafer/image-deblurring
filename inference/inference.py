@@ -76,13 +76,20 @@ def delta_e_cie2000_torch(lab1, lab2):
 
     return delta_e
 
-# Argument Parser
-parser = argparse.ArgumentParser(description='Single Image Motion Deblurring using Restormer')
-parser.add_argument('--input_dir', default='./inference/dataset/motion/testrealblur/RealBlur-R', type=str, help='Directory of validation images')
-parser.add_argument('--result_dir', default='./inference/results/motion/testrealblur/RealBlur-R', type=str, help='Directory for results')
-parser.add_argument('--weights', default='./inference/models/initial_pretrained/motion/motion_deblurring.pth', type=str, help='Path to weights')
-parser.add_argument('--dataset', default='RealBlur-R', type=str, help='Test Dataset')  # ['GoPro', 'HIDE', 'RealBlur_J', 'RealBlur_R']
+# Extract model name from the weights path
+weights_path = './inference/models/initial_pretrained/motion/motion_deblurring.pth'
+model_name = os.path.basename(weights_path).replace(".pth", "")
 
+# Extract dataset name from the input directory
+input_dir_path = './inference/dataset/motion/testrealblur/RealBlur-R'
+dataset_name = os.path.basename(os.path.normpath(input_dir_path))
+
+# Combine model name and dataset name
+parser = argparse.ArgumentParser(description='Single Image Motion Deblurring using Restormer')
+parser.add_argument('--input_dir', default=input_dir_path, type=str, help='Directory of validation images')
+parser.add_argument('--result_dir', default='./inference/results/motion/testrealblur/RealBlur-R', type=str, help='Directory for results')
+parser.add_argument('--weights', default=weights_path, type=str, help='Path to weights')
+parser.add_argument('--dataset', default=f"{model_name}_{dataset_name}", type=str, help='Dataset name derived from model and input directory')
 args = parser.parse_args()
 
 # LPIPS Model
@@ -158,6 +165,8 @@ with torch.no_grad():
             if os.path.exists(result_path):
                 logging.info(f"Skipping already processed file: {filename}")
                 continue
+
+            logging.info(f"Processing file: {filename}")
 
             torch.cuda.ipc_collect()
             torch.cuda.empty_cache()
