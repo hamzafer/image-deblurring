@@ -36,7 +36,6 @@ archive\ \(1\).zip
 # Ignore datasets and models
 inference/dataset/*
 inference/models/*
-inference/logs/*
 !inference/dataset/.gitkeep
 !inference/models/.gitkeep
 Motion_Deblurring/conv_complete/Conv/test.zip
