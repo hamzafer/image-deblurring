@@ -82,18 +82,17 @@ def delta_e_cie2000_torch(lab1, lab2):
     return delta_e
 
 
+# Input directory (sharp and blurry images)
 parser = argparse.ArgumentParser(description='Single Image Motion Deblurring using Restormer')
-
-parser.add_argument('--input_dir', default='./conv_complete/Conv/test', type=str, help='Directory of validation images')
-parser.add_argument('--result_dir', default='./results/conv_compl', type=str, help='Directory for results')
-#parser.add_argument('--weights', default='../archive_experiments_realblurJ/Deblurring_Restormer/models/net_g_latest.pth', type=str, help='Path to weights')
-parser.add_argument('--weights', default='./pretrained_models/motion_deblurring.pth', type=str, help='Path to weights')
-parser.add_argument('--dataset', default='bench', type=str, help='Test Dataset') # ['GoPro', 'HIDE', 'RealBlur_J', 'RealBlur_R']
+parser.add_argument('--input_dir', default='./inference/dataset/motion/testrealblur/RealBlur-R', type=str, help='Directory of validation images')
+parser.add_argument('--result_dir', default='./inference/results/motion/testrealblur/RealBlur-R', type=str, help='Directory for results')
+parser.add_argument('--weights', default='./inference/models/initial_pretrained/motion/motion_deblurring.pth', type=str, help='Path to weights')
+parser.add_argument('--dataset', default='RealBlur-R', type=str, help='Test Dataset')  # ['GoPro', 'HIDE', 'RealBlur_J', 'RealBlur_R']
 
 args = parser.parse_args()
 
-####### Load yaml #######
-yaml_file = 'Options/Deblurring_Restormer.yml'
+yaml_file = './inference/Options/Deblurring_Restormer.yml'
+
 import yaml
 
 try:
@@ -121,70 +120,73 @@ dataset = args.dataset
 result_dir  = os.path.join(args.result_dir, dataset)
 os.makedirs(result_dir, exist_ok=True)
 
-inp_dir = os.path.join(args.input_dir, 'sharp')
-tar_dir = os.path.join(args.input_dir, 'blurry')
+inp_dir = os.path.join(args.input_dir, 'input')
+tar_dir = os.path.join(args.input_dir, 'target')
 
-filesI = natsorted(glob(os.path.join(inp_dir, '*_151.png')) + glob(os.path.join(inp_dir, '*_151.jpg')))[:50]
-filesC = natsorted(glob(os.path.join(tar_dir, '*_151.png')) + glob(os.path.join(tar_dir, '*_151.jpg')))[:50]
+filesI = natsorted(glob(os.path.join(inp_dir, '*.png')) + glob(os.path.join(inp_dir, '*.jpg')))
+filesC = natsorted(glob(os.path.join(tar_dir, '*.png')) + glob(os.path.join(tar_dir, '*.jpg')))
 
 psnr, mae, ssim, pips = [], [], [], []
 color_diffs = []
 
 with torch.no_grad():
-    for fileI, fileC in tqdm(zip(filesI, filesC), total=len(filesC)):
-        torch.cuda.ipc_collect()
-        torch.cuda.empty_cache()
+    try:
+        for fileI, fileC in tqdm(zip(filesI, filesC), total=len(filesC)):
+            torch.cuda.ipc_collect()
+            torch.cuda.empty_cache()
 
-        imgI = np.float32(utils.load_img(fileI))/255.
-        imgI = cv2.resize(imgI, (1280,720), interpolation=cv2.INTER_AREA)
+            imgI = np.float32(utils.load_img(fileI))/255.
+            imgI = cv2.resize(imgI, (1280,720), interpolation=cv2.INTER_AREA)
 
-        imgC = np.float32(utils.load_img(fileC))/255.
-        imgC = cv2.resize(imgC, (1280,720), interpolation=cv2.INTER_AREA)
+            imgC = np.float32(utils.load_img(fileC))/255.
+            imgC = cv2.resize(imgC, (1280,720), interpolation=cv2.INTER_AREA)
 
-        imgI = torch.from_numpy(imgI).permute(2,0,1)
-        target = torch.from_numpy(imgC).permute(2,0,1)
-        input_ = imgI.unsqueeze(0).cuda()
-        target = target.unsqueeze(0).cuda()
+            imgI = torch.from_numpy(imgI).permute(2,0,1)
+            target = torch.from_numpy(imgC).permute(2,0,1)
+            input_ = imgI.unsqueeze(0).cuda()
+            target = target.unsqueeze(0).cuda()
 
-        # Padding in case images are not multiples of 8
-        h,w = input_.shape[2], input_.shape[3]
-        H,W = ((h+factor)//factor)*factor, ((w+factor)//factor)*factor
-        padh = H-h if h%factor!=0 else 0
-        padw = W-w if w%factor!=0 else 0
-        input_ = F.pad(input_, (0,padw,0,padh), 'reflect')
-        #target = F.pad(target, (0,padw,0,padh), 'reflect')
+            # Padding in case images are not multiples of 8
+            h,w = input_.shape[2], input_.shape[3]
+            H,W = ((h+factor)//factor)*factor, ((w+factor)//factor)*factor
+            padh = H-h if h%factor!=0 else 0
+            padw = W-w if w%factor!=0 else 0
+            input_ = F.pad(input_, (0,padw,0,padh), 'reflect')
+            #target = F.pad(target, (0,padw,0,padh), 'reflect')
 
-        restored = model_restoration(input_)
+            restored = model_restoration(input_)
 
-        # Unpad images to original dimensions
-        restored = restored[:,:,:h,:w]
+            # Unpad images to original dimensions
+            restored = restored[:,:,:h,:w]
 
-        restored = torch.clamp(restored,0,1)
-        psps = alex(target, restored, normalize=True).item()
-        pips.append(alex(target, restored, normalize=True).item())
+            restored = torch.clamp(restored,0,1)
+            psps = alex(target, restored, normalize=True).item()
+            pips.append(alex(target, restored, normalize=True).item())
 
-        delta_e_cie2000 = delta_e_cie2000_torch(target, restored)
-        delta_e_cie2000 = delta_e_cie2000.mean().item()
-        color_diffs.append(delta_e_cie2000)
+            delta_e_cie2000 = delta_e_cie2000_torch(target, restored)
+            delta_e_cie2000 = delta_e_cie2000.mean().item()
+            color_diffs.append(delta_e_cie2000)
 
-        restored = restored.cpu().detach().permute(0, 2, 3,1).squeeze(0).numpy()
-        
+            restored = restored.cpu().detach().permute(0, 2, 3,1).squeeze(0).numpy()
+            
 
-        psnr.append(utils.PSNR(imgC, restored))
-        mae.append(utils.MAE(imgC, restored))
-        ssim.append(utils.SSIM(imgC, restored))
+            psnr.append(utils.PSNR(imgC, restored))
+            mae.append(utils.MAE(imgC, restored))
+            ssim.append(utils.SSIM(imgC, restored))
 
-        if utils.PSNR(imgC, restored) <= 20 :
-            print("Image {}: PSNR {:4f} SSIM {:4f} MAE {:4f} LPIPS {:4f} Color Delta {:4f}".format(fileC.split("/")[-1], (utils.PSNR(imgC, restored)), (utils.SSIM(imgC, restored)), (utils.MAE(imgC, restored)), (psps), delta_e_cie2000))
-            save_file = os.path.join(result_dir, "bad", os.path.split(fileC)[-1])
-            restored = np.uint8((restored*255).round())
-            #utils.save_img(save_file, restored)
+            if utils.PSNR(imgC, restored) <= 20 :
+                print("Image {}: PSNR {:4f} SSIM {:4f} MAE {:4f} LPIPS {:4f} Color Delta {:4f}".format(fileC.split("/")[-1], (utils.PSNR(imgC, restored)), (utils.SSIM(imgC, restored)), (utils.MAE(imgC, restored)), (psps), delta_e_cie2000))
+                save_file = os.path.join(result_dir, "bad", os.path.split(fileC)[-1])
+                restored = np.uint8((restored*255).round())
+                #utils.save_img(save_file, restored)
 
-        if utils.PSNR(imgC, restored) >= 30:
-            print("Image {}: PSNR {:4f} SSIM {:4f} MAE {:4f} LPIPS {:4f} Color Delta {:4f}".format(fileC.split("/")[-1], (utils.PSNR(imgC, restored)), (utils.SSIM(imgC, restored)), (utils.MAE(imgC, restored)), (psps), delta_e_cie2000))
-            save_file = os.path.join(result_dir, "good", os.path.split(fileC)[-1])
-            restored = np.uint8((restored*255).round())
-            utils.save_img(save_file, restored)
+            if utils.PSNR(imgC, restored) >= 30:
+                print("Image {}: PSNR {:4f} SSIM {:4f} MAE {:4f} LPIPS {:4f} Color Delta {:4f}".format(fileC.split("/")[-1], (utils.PSNR(imgC, restored)), (utils.SSIM(imgC, restored)), (utils.MAE(imgC, restored)), (psps), delta_e_cie2000))
+                save_file = os.path.join(result_dir, "good", os.path.split(fileC)[-1])
+                restored = np.uint8((restored*255).round())
+                utils.save_img(save_file, restored)
+    except Exception as e:
+        print(e)
 
 psnr, mae, ssim, pips = np.array(psnr), np.array(mae), np.array(ssim), np.array(pips)
 color_diffs = np.array(color_diffs)
