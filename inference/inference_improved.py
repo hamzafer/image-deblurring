@@ -64,7 +64,7 @@ def delta_e_cie2000_torch(lab1, lab2):
     delta_e = torch.sqrt(L_term**2 + C_term**2 + H_term**2)
     return delta_e
 
-yaml_file = './inference/inference_improved.py'
+yaml_file = './Motion_Deblurring/Options/Reversible_Restomer.yml'
 
 # Arguments
 weights_path = './inference/models/improved_from_scratch/best_new_model.pth'
