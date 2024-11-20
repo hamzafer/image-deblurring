@@ -63,11 +63,12 @@ def delta_e_cie2000_torch(lab1, lab2):
     delta_e = torch.sqrt(L_term**2 + C_term**2 + H_term**2)
     return delta_e
 
+yaml_file = './inference/Options/Deblurring_Restormer.yml'
 
 # Arguments
 weights_path = './inference/models/initial_pretrained/motion/motion_deblurring.pth'
-input_dir_path = './inference/dataset/motion/testrealblur/RealBlur-R'
-result_base_dir = './inference/results/motion/testrealblur/RealBlur-R'
+input_dir_path = './inference/dataset/motion/testrealblur/RealBlur-J'
+result_base_dir = './inference/results/motion/testrealblur/RealBlur-J'
 
 model_name = os.path.basename(weights_path).replace(".pth", "")
 dataset_name = os.path.basename(os.path.normpath(input_dir_path))
@@ -92,7 +93,6 @@ logging.basicConfig(filename=log_file, level=logging.INFO, format='%(asctime)s -
 csv_file = os.path.join(log_dir, f"metrics_{model_name}_{dataset_name}.csv")
 csv_headers = ['Image', 'PSNR', 'SSIM', 'MAE', 'LPIPS', 'DeltaE', 'Category']
 
-yaml_file = './inference/Options/Deblurring_Restormer.yml'
 try:
     from yaml import CLoader as Loader
 except ImportError:
