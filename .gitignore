@@ -39,3 +39,5 @@ inference/models/*
 inference/logs/*
 !inference/dataset/.gitkeep
 !inference/models/.gitkeep
+Motion_Deblurring/conv_complete/Conv/test.zip
+Motion_Deblurring/Datasets/test/testrealblur.zip
