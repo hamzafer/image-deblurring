@@ -10,7 +10,6 @@ import utils
 from natsort import natsorted
 from glob import glob
 from basicsr.models.archs.restormer_arch import Restormer
-from basicsr.models.archs.reversible_restormer_arch import ReversibleRestormer
 from skimage import img_as_ubyte
 import warnings
 import kornia.color
@@ -64,10 +63,10 @@ def delta_e_cie2000_torch(lab1, lab2):
     delta_e = torch.sqrt(L_term**2 + C_term**2 + H_term**2)
     return delta_e
 
-yaml_file = './inference/Options/Improved_Restomer.yml'
+yaml_file = './inference/Options/Deblurring_Restormer.yml'
 
 # Arguments
-weights_path = './inference/models/improved_from_scratch/best_new_model.pth'
+weights_path = './inference/models/initial_pretrained/motion/motion_deblurring.pth'
 input_dir_path = './inference/dataset/motion/testrealblur/RealBlur-R'
 result_base_dir = './inference/results/motion/testrealblur/RealBlur-R'
 
@@ -103,8 +102,7 @@ x = yaml.load(open(yaml_file, mode='r'), Loader=Loader)
 x['network_g'].pop('type')
 
 # Initialize Model
-#model_restoration = Restormer(**x['network_g'])
-model_restoration = ReversibleRestormer(**x['network_g'])
+model_restoration = Restormer(**x['network_g'])
 checkpoint = torch.load(args.weights)
 model_restoration.load_state_dict(checkpoint['params'])
 model_restoration.cuda()
