@@ -47,7 +47,7 @@ This project leverages a variety of datasets for training and evaluation:
    - Variants: RealBlur-R (RAW) and RealBlur-J (JPEG).
    - <img width="402" alt="image" src="https://github.com/user-attachments/assets/cee8c05d-6421-467f-a641-d6f7f07c8222">
 3. **Ultra-High-Definition Motion Blurred (UHDM) Dataset:** High-resolution images (4K-6K) with complex blur patterns.
-   - Dataset: [Kaggle UHDM Dataset](https://www.kaggle.com/datasets/soumikrakshit/uhdm-dataset)
+   - Dataset: [UHDM Dataset](https://github.com/HDCVLab/MC-Blur-Dataset)
    - <img width="402" alt="image" src="https://github.com/user-attachments/assets/517771b3-2283-4f6a-991d-5e8724a0fd6c">
 
 ## Evaluation Metrics
