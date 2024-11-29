@@ -88,6 +88,7 @@ pip install -r requirements.txt
 Refer to `INSTALL.md` for detailed setup instructions.
 
 ## Usage
+Model weights can be found here: [Model Weights](https://studntnu-my.sharepoint.com/:f:/g/personal/muhamhz_ntnu_no/EvkFh21u5hZIr0TNXuW1HI0Bqyced3ZYhG_rxnOzyQD-Jw?e=vU817A)
 
 ### Running Inference
 To test the improved model on your own images:
