@@ -10,6 +10,7 @@ import utils
 from natsort import natsorted
 from glob import glob
 from basicsr.models.archs.restormer_arch import Restormer
+from basicsr.models.archs.reversible_restormer_arch import ReversibleRestormer
 from skimage import img_as_ubyte
 import warnings
 import kornia.color
@@ -63,150 +64,176 @@ def delta_e_cie2000_torch(lab1, lab2):
     delta_e = torch.sqrt(L_term**2 + C_term**2 + H_term**2)
     return delta_e
 
-yaml_file = './inference/Options/Deblurring_Restormer.yml'
 
 # Arguments
-weights_path = './inference/models/initial_pretrained/motion/motion_deblurring.pth'
-input_dir_path = './inference/dataset/motion/testuhdm'
-result_base_dir = './inference/dataset/motion/testuhdm'
+weights_path = [#'./models/initial_pretrained/motion/motion_deblurring.pth',
+                #'./models/fine_tune/motion/finetunedwithJ.pth',
+                #'./models/fine_tune/motion/finetunedwithR.pth',
+                #'./models/trained_from_scratch/trained_from_scratch.pth',
+                './models/improved_from_scratch/best_new_model.pth']
 
-model_name = os.path.basename(weights_path).replace(".pth", "")
-dataset_name = os.path.basename(os.path.normpath(input_dir_path))
+for path in weights_path:
+    if os.path.exists(path):
+        print(f"File exists: {path}")
+    else:
+        print(f"File does NOT exist: {path}")
 
-parser = argparse.ArgumentParser(description='Single Image Motion Deblurring using Restormer')
-parser.add_argument('--input_dir', default=input_dir_path, type=str, help='Directory of validation images')
-parser.add_argument('--result_dir', default=result_base_dir, type=str, help='Directory for results')
-parser.add_argument('--weights', default=weights_path, type=str, help='Path to weights')
-parser.add_argument('--dataset', default=f"{model_name}_{dataset_name}", type=str, help='Dataset name derived from model and input directory')
-args = parser.parse_args()
 
-# LPIPS Model
-alex = lpips.LPIPS(net='alex').cuda()
+input_dir_path = './dataset/motion/testuhdm'
+result_base_dir = './new_results/motion/testuhdm'
 
-# Logging Setup
-log_dir = f"./inference/logs/{model_name}_{dataset_name}"
-os.makedirs(log_dir, exist_ok=True)
-log_file = os.path.join(log_dir, f"inference_run_{time.strftime('%Y-%m-%d_%H-%M-%S')}.log")
-logging.basicConfig(filename=log_file, level=logging.INFO, format='%(asctime)s - %(message)s')
 
-# Metrics CSV Setup
-csv_file = os.path.join(log_dir, f"metrics_{model_name}_{dataset_name}.csv")
-csv_headers = ['Image', 'PSNR', 'SSIM', 'MAE', 'LPIPS', 'DeltaE', 'Category']
+for path in weights_path:
+    if path == './models/improved_from_scratch/best_new_model.pth':
+        try:
+            from yaml import CLoader as Loader
+        except ImportError:
+            from yaml import Loader
+        yaml_file = './Options/Improved_Restomer.yml'
+        x = yaml.load(open(yaml_file, mode='r'), Loader=Loader)
+        x['network_g'].pop('type')
+        model_restoration = ReversibleRestormer(**x['network_g'])
+        print("Using Reversible Restormer")
+    else :
+        try:
+            from yaml import CLoader as Loader
+        except ImportError:
+            from yaml import Loader
+        yaml_file = './Options/Deblurring_Restormer.yml'
+        x = yaml.load(open(yaml_file, mode='r'), Loader=Loader)
+        x['network_g'].pop('type')
+        model_restoration = Restormer(**x['network_g'])
 
-try:
-    from yaml import CLoader as Loader
-except ImportError:
-    from yaml import Loader
+    model_name = os.path.basename(path).replace(".pth", "")
+    dataset_name = os.path.basename(os.path.normpath(input_dir_path))
 
-x = yaml.load(open(yaml_file, mode='r'), Loader=Loader)
-x['network_g'].pop('type')
+    parser = argparse.ArgumentParser(description='Single Image Motion Deblurring using Restormer')
+    parser.add_argument('--input_dir', default=input_dir_path, type=str, help='Directory of validation images')
+    parser.add_argument('--result_dir', default=result_base_dir, type=str, help='Directory for results')
+    parser.add_argument('--weights', default=path, type=str, help='Path to weights')
+    parser.add_argument('--dataset', default=f"{model_name}_{dataset_name}", type=str, help='Dataset name derived from model and input directory')
+    args = parser.parse_args()
 
-# Initialize Model
-model_restoration = Restormer(**x['network_g'])
-checkpoint = torch.load(args.weights)
-model_restoration.load_state_dict(checkpoint['params'])
-model_restoration.cuda()
-model_restoration = nn.DataParallel(model_restoration)
-model_restoration.eval()
+    # LPIPS Model
+    alex = lpips.LPIPS(net='alex').cuda()
 
-logging.info("==========================================")
-logging.info(f"Starting inference for model: {model_name}, dataset: {dataset_name}")
-logging.info(f"Input Directory: {args.input_dir}")
-logging.info(f"Results Directory: {args.result_dir}")
-logging.info("==========================================")
+    # Logging Setup
+    log_dir = f"./logs/{model_name}_{dataset_name}_new"
+    os.makedirs(log_dir, exist_ok=True)
+    log_file = os.path.join(log_dir, f"inference_run_{time.strftime('%Y-%m-%d_%H-%M-%S')}.log")
+    logging.basicConfig(filename=log_file, level=logging.INFO, format='%(asctime)s - %(message)s')
 
-# Directory Setup
-result_dir = os.path.join(args.result_dir, f"{model_name}_{dataset_name}")
-good_dir = os.path.join(result_dir, "good")
-bad_dir = os.path.join(result_dir, "bad")
-neutral_dir = os.path.join(result_dir, "neutral")
-all_dir = os.path.join(result_dir, "all")
-os.makedirs(good_dir, exist_ok=True)
-os.makedirs(bad_dir, exist_ok=True)
-os.makedirs(neutral_dir, exist_ok=True)
-os.makedirs(all_dir, exist_ok=True)
+    # Metrics CSV Setup
+    csv_file = os.path.join(log_dir, f"metrics_{model_name}_{dataset_name}_new.csv")
+    csv_headers = ['Image', 'PSNR', 'SSIM', 'MAE', 'LPIPS', 'DeltaE', 'Category']
 
-inp_dir = os.path.join(args.input_dir, 'blurry')
-tar_dir = os.path.join(args.input_dir, 'sharp')
 
-filesI = natsorted(glob(os.path.join(inp_dir, '*_171.png')) + glob(os.path.join(inp_dir, '*.jpg')))
-filesC = natsorted(glob(os.path.join(tar_dir, '*_171.png')) + glob(os.path.join(tar_dir, '*.jpg')))
+   
 
-logging.info(f"Found {len(filesI)} input images and {len(filesC)} target images.")
+    checkpoint = torch.load(args.weights)
+    model_restoration.load_state_dict(checkpoint['params'])
+    model_restoration.cuda()
+    model_restoration = nn.DataParallel(model_restoration)
+    model_restoration.eval()
 
-# CSV Header
-with open(csv_file, mode='w', newline='') as f:
-    writer = csv.writer(f)
-    writer.writerow(csv_headers)
+    logging.info("==========================================")
+    logging.info(f"Starting inference for model: {model_name}, dataset: {dataset_name}")
+    logging.info(f"Input Directory: {args.input_dir}")
+    logging.info(f"Results Directory: {args.result_dir}")
+    logging.info("==========================================")
 
-# Skipping Logic
-processed_base_names = set(
-    os.path.splitext(os.path.basename(f))[0].split('_PSNR')[0] for f in glob(os.path.join(all_dir, '*.png'))
-)
+    # Directory Setup
+    result_dir = os.path.join(args.result_dir, f"{model_name}_{dataset_name}")
+    good_dir = os.path.join(result_dir, "good")
+    bad_dir = os.path.join(result_dir, "bad")
+    neutral_dir = os.path.join(result_dir, "neutral")
+    all_dir = os.path.join(result_dir, "all")
+    os.makedirs(good_dir, exist_ok=True)
+    os.makedirs(bad_dir, exist_ok=True)
+    os.makedirs(neutral_dir, exist_ok=True)
+    os.makedirs(all_dir, exist_ok=True)
 
-# Metrics
-psnr, mae, ssim, pips, color_diffs = [], [], [], [], []
+    inp_dir = os.path.join(args.input_dir, 'blurry')
+    tar_dir = os.path.join(args.input_dir, 'sharp')
 
-# Inference
-start_time = time.time()
-with torch.no_grad():
-    try:
-        for fileI, fileC in tqdm(zip(filesI, filesC), total=len(filesC)):
-            filename = os.path.basename(fileI)
-            base_name = os.path.splitext(filename)[0]
-            if base_name in processed_base_names:
-                logging.info(f"Skipping already processed file: {filename}")
-                continue
+    filesI = natsorted(glob(os.path.join(inp_dir, '*.png')) + glob(os.path.join(inp_dir, '*.jpg')))
+    filesC = natsorted(glob(os.path.join(tar_dir, '*.png')) + glob(os.path.join(tar_dir, '*.jpg')))
 
-            logging.info(f"Processing file: {filename}")
+    logging.info(f"Found {len(filesI)} input images and {len(filesC)} target images.")
 
-            torch.cuda.ipc_collect()
-            torch.cuda.empty_cache()
+    # CSV Header
+    with open(csv_file, mode='w', newline='') as f:
+        writer = csv.writer(f)
+        writer.writerow(csv_headers)
 
-            imgI = np.float32(utils.load_img(fileI)) / 255.0
-            imgI = cv2.resize(imgI, (1280, 720))
+    # Skipping Logic
+    processed_base_names = set(
+        os.path.splitext(os.path.basename(f))[0].split('_PSNR')[0] for f in glob(os.path.join(all_dir, '*.png'))
+    )
 
-            imgC = np.float32(utils.load_img(fileC)) / 255.0
-            imgC = cv2.resize(imgC, (1280, 720))
+    # Metrics
+    psnr, mae, ssim, pips, color_diffs = [], [], [], [], []
 
-            imgI = torch.from_numpy(imgI).permute(2, 0, 1).unsqueeze(0).cuda()
-            target = torch.from_numpy(imgC).permute(2, 0, 1).unsqueeze(0).cuda()
+    # Inference
+    start_time = time.time()
+    with torch.no_grad():
+        try:
+            for fileI, fileC in tqdm(zip(filesI, filesC), total=len(filesC)):
+                filename = os.path.basename(fileI)
+                base_name = os.path.splitext(filename)[0]
+                if base_name in processed_base_names:
+                    logging.info(f"Skipping already processed file: {filename}")
+                    continue
 
-            h, w = imgI.shape[2], imgI.shape[3]
-            H, W = ((h + 8) // 8) * 8, ((w + 8) // 8) * 8
-            padh, padw = H - h, W - w
-            input_ = F.pad(imgI, (0, padw, 0, padh), 'reflect')
+                logging.info(f"Processing file: {filename}")
 
-            restored = model_restoration(input_)
-            restored = restored[:, :, :h, :w].clamp(0, 1)
-            restored_np = restored.cpu().permute(0, 2, 3, 1).squeeze(0).numpy()
-            psps = alex(target, restored).item()
-            delta_e_cie2000 = delta_e_cie2000_torch(target, restored).mean().item()
+                torch.cuda.ipc_collect()
+                torch.cuda.empty_cache()
 
-            # Metrics
-            psnr_value = utils.PSNR(imgC, restored_np)
-            category = "good" if psnr_value >= 30 else "bad" if psnr_value <= 20 else "neutral"
-            metrics_suffix = f"_PSNR{psnr_value:.2f}_SSIM{utils.SSIM(imgC, restored_np):.2f}_MAE{utils.MAE(imgC, restored_np):.2f}_LPIPS{psps:.2f}_DeltaE{delta_e_cie2000:.2f}"
-            result_path = os.path.join(all_dir, f"{base_name}{metrics_suffix}.png")
-            utils.save_img(result_path, (restored_np * 255).astype(np.uint8))
+                imgI = np.float32(utils.load_img(fileI)) / 255.0
+                imgI = cv2.resize(imgI, (1280, 720))
 
-            category_dir = good_dir if category == "good" else bad_dir if category == "bad" else neutral_dir
-            utils.save_img(os.path.join(category_dir, os.path.basename(result_path)), (restored_np * 255).astype(np.uint8))
+                imgC = np.float32(utils.load_img(fileC)) / 255.0
+                imgC = cv2.resize(imgC, (1280, 720))
 
-            with open(csv_file, mode='a', newline='') as f:
-                writer = csv.writer(f)
-                writer.writerow([filename, psnr_value, utils.SSIM(imgC, restored_np), utils.MAE(imgC, restored_np), psps, delta_e_cie2000, category])
+                imgI = torch.from_numpy(imgI).permute(2, 0, 1).unsqueeze(0).cuda()
+                target = torch.from_numpy(imgC).permute(2, 0, 1).unsqueeze(0).cuda()
 
-            psnr.append(psnr_value)
-            mae.append(utils.MAE(imgC, restored_np))
-            ssim.append(utils.SSIM(imgC, restored_np))
-            pips.append(psps)
-            color_diffs.append(delta_e_cie2000)
+                h, w = imgI.shape[2], imgI.shape[3]
+                H, W = ((h + 8) // 8) * 8, ((w + 8) // 8) * 8
+                padh, padw = H - h, W - w
+                input_ = F.pad(imgI, (0, padw, 0, padh), 'reflect')
 
-    except Exception as e:
-        logging.error(f"Error during inference: {e}")
+                restored = model_restoration(input_)
+                restored = restored[:, :, :h, :w].clamp(0, 1)
+                restored_np = restored.cpu().permute(0, 2, 3, 1).squeeze(0).numpy()
+                psps = alex(target, restored).item()
+                delta_e_cie2000 = delta_e_cie2000_torch(target, restored).mean().item()
 
-end_time = time.time()
-logging.info(f"Inference completed in {end_time - start_time:.2f} seconds.")
-logging.info(f"Overall Metrics - PSNR: {np.mean(psnr):.4f}, SSIM: {np.mean(ssim):.4f}, "
-             f"MAE: {np.mean(mae):.4f}, LPIPS: {np.mean(pips):.4f}, DeltaE: {np.mean(color_diffs):.4f}")
+                # Metrics
+                psnr_value = utils.PSNR(imgC, restored_np)
+                category = "good" if psnr_value >= 30 else "bad" if psnr_value <= 20 else "neutral"
+                metrics_suffix = f"_PSNR{psnr_value:.2f}_SSIM{utils.SSIM(imgC, restored_np):.2f}_MAE{utils.MAE(imgC, restored_np):.2f}_LPIPS{psps:.2f}_DeltaE{delta_e_cie2000:.2f}"
+                result_path = os.path.join(all_dir, f"{base_name}{metrics_suffix}.png")
+                utils.save_img(result_path, (restored_np * 255).astype(np.uint8))
+
+                category_dir = good_dir if category == "good" else bad_dir if category == "bad" else neutral_dir
+                utils.save_img(os.path.join(category_dir, os.path.basename(result_path)), (restored_np * 255).astype(np.uint8))
+
+                with open(csv_file, mode='a', newline='') as f:
+                    writer = csv.writer(f)
+                    writer.writerow([filename, psnr_value, utils.SSIM(imgC, restored_np), utils.MAE(imgC, restored_np), psps, delta_e_cie2000, category])
+
+                psnr.append(psnr_value)
+                mae.append(utils.MAE(imgC, restored_np))
+                ssim.append(utils.SSIM(imgC, restored_np))
+                pips.append(psps)
+                color_diffs.append(delta_e_cie2000)
+
+        except Exception as e:
+            logging.error(f"Error during inference: {e}")
+
+    end_time = time.time()
+    logging.info(f"Inference completed in {end_time - start_time:.2f} seconds.")
+    logging.info(f"Overall Metrics - PSNR: {np.mean(psnr):.4f}, SSIM: {np.mean(ssim):.4f}, "
+                f"MAE: {np.mean(mae):.4f}, LPIPS: {np.mean(pips):.4f}, DeltaE: {np.mean(color_diffs):.4f}")
