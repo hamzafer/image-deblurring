@@ -1,162 +1,108 @@
+# Efficient Transformer for High-Resolution Image Motion Deblurring
 
-# Restormer: Efficient Transformer for High-Resolution Image Restoration (CVPR 2022 -- Oral)
+## Overview
 
-[Syed Waqas Zamir](https://scholar.google.ae/citations?hl=en&user=POoai-QAAAAJ), [Aditya Arora](https://adityac8.github.io/), [Salman Khan](https://salman-h-khan.github.io/), [Munawar Hayat](https://scholar.google.com/citations?user=Mx8MbWYAAAAJ&hl=en), [Fahad Shahbaz Khan](https://scholar.google.es/citations?user=zvaeYnUAAAAJ&hl=en), and [Ming-Hsuan Yang](https://scholar.google.com/citations?user=p9-ohHsAAAAJ&hl=en)
+This project builds upon the [Restormer](https://github.com/swz30/Restormer) architecture, enhancing its efficiency and performance for the task of high-resolution image motion deblurring. The improvements include architectural modifications, advanced training techniques, and extended evaluations on diverse datasets to create a robust and efficient model for real-world deblurring challenges.
 
-[![paper](https://img.shields.io/badge/arXiv-Paper-<COLOR>.svg)](https://arxiv.org/abs/2111.09881)
-[![supplement](https://img.shields.io/badge/Supplementary-Material-red)](https://drive.google.com/file/d/1oKGON8vG4uDWMmZKqHeTMnFowhOubifK/view?usp=sharing)
-[![video](https://img.shields.io/badge/Video-Presentation-F9D371)](https://www.youtube.com/watch?v=3mqu6N4_0pY&t)
-[![slides](https://img.shields.io/badge/Presentation-Slides-B762C1)](https://drive.google.com/file/d/19wKhnQtr3mcD6IsLj0ZFSwCgIRKUkDQJ/view?usp=sharing)
-[![Summary](https://img.shields.io/badge/Summary-Slide-87CEEB)](https://drive.google.com/file/d/1wyKAMLzJpDqHiF6AMsmnmGQC241GyT8q/view?usp=sharing)
+### Key Features of This Work
+- **Reduced Model Complexity:** The model complexity is reduced by 18.4%, improving inference speed and reducing memory requirements.
+- **Enhanced Training Pipeline:** Incorporation of transformations such as color jitter, Gaussian blur, perspective transforms, and a new frequency-domain loss function to improve robustness and accuracy.
+- **Extensive Evaluation:** Experiments performed on RealBlur-R, RealBlur-J, and the Ultra-High-Definition Motion Blurred (UHDM) datasets.
+- **Ablation Studies:** Detailed analyses to quantify the impact of architectural and training modifications.
 
+This project retains the core innovations of Restormer, including its multi-Dconv head transposed attention mechanism and gated-Dconv feed-forward network, while introducing custom enhancements tailored to motion deblurring tasks.
 
-#### News
-- **April 4, 2022:** Integrated into [Huggingface Spaces 🤗](https://huggingface.co/spaces) using [Gradio](https://github.com/gradio-app/gradio). Try out the web demo: [![Hugging Face Spaces](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/swzamir/Restormer)
-- **March 30, 2022:** Added Colab Demo. [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1C2818h7KnjNv4R1sabe14_AYL7lWhmu6?usp=sharing)
-- **March 29, 2022:** Restormer is selected for an ORAL presentation at CVPR 2022 :dizzy:
-- **March 10, 2022:** Training codes are released :fire:
-- **March 3, 2022:** Paper accepted at CVPR 2022 :tada: 
-- **Nov 21, 2021:** Testing codes and pre-trained models are released!
+## Architectural Modifications
 
-<hr />
+### Key Changes
+1. **Reduction in Parameters:** Number of layers and transformer blocks reduced to lower computational overhead.
+2. **Increased Attention Heads:** Doubling attention heads per stage to enhance feature extraction while balancing computational costs.
+3. **Custom Loss Function:** Integration of a frequency-domain loss alongside L1 pixel-wise loss for better preservation of fine details.
 
-> **Abstract:** *Since convolutional neural networks (CNNs) perform well at learning generalizable image priors from large-scale data, these models have been extensively applied to image restoration and related tasks. Recently, another class of neural architectures, Transformers, have shown significant performance gains on natural language and high-level vision tasks. While the Transformer model mitigates the shortcomings of CNNs (i.e., limited receptive field and inadaptability to input content), its computational complexity grows quadratically with the spatial resolution, therefore making it infeasible to apply to most image restoration tasks involving high-resolution images. In this work, we propose an efficient Transformer model by making several key designs in the building blocks (multi-head attention and feed-forward network) such that it can capture long-range pixel interactions, while still remaining applicable to large images. Our model, named Restoration Transformer (Restormer), achieves state-of-the-art results on several image restoration tasks, including image deraining, single-image motion deblurring, defocus deblurring (single-image and dual-pixel data), and image denoising (Gaussian grayscale/color denoising, and real image denoising).* 
-<hr />
+These modifications resulted in faster convergence, improved stability, and better performance across a range of datasets and challenging scenarios.
 
-## Network Architecture
+## Training Enhancements
 
-<img src = "https://i.imgur.com/ulLoEig.png"> 
+### Added Transformations
+- **Color Jitter:** Simulates real-world variations in lighting conditions.
+- **Gaussian Blur:** Adds robustness against noise and blurring artifacts.
+- **Perspective Transform:** Models geometric distortions for diverse scenarios.
+
+### Frequency-Domain Loss
+Incorporates Fourier transform analysis to emphasize high-frequency details, crucial for sharp edges and textures.
+
+The combined effect of these augmentations improves the model’s ability to generalize across diverse real-world conditions.
+
+## Datasets
+
+This project leverages a variety of datasets for training and evaluation:
+1. **GoPro Dataset:** Synthetic motion blur images (1280x720 resolution).
+   - Dataset: [Papers With Code](https://paperswithcode.com/dataset/gopro)
+2. **RealBlur Dataset:** Real-world motion blur images with ground truth references.
+   - Dataset: [RealBlur Dataset](https://cg.postech.ac.kr/research/realblur/)
+   - Variants: RealBlur-R (RAW) and RealBlur-J (JPEG).
+3. **Ultra-High-Definition Motion Blurred (UHDM) Dataset:** High-resolution images (4K-6K) with complex blur patterns.
+   - Dataset: [Kaggle UHDM Dataset](https://www.kaggle.com/datasets/soumikrakshit/uhdm-dataset)
+
+## Evaluation Metrics
+Performance is measured using:
+- **PSNR (Peak Signal-to-Noise Ratio):** Quantifies image restoration quality.
+- **SSIM (Structural Similarity Index):** Evaluates perceptual and structural fidelity.
+- **DeltaE (Color Difference):** Measures color accuracy using the DeltaE2000 metric.
+- **LPIPS (Learned Perceptual Image Patch Similarity):** Assesses perceptual similarity between restored and ground truth images.
+
+## Results
+- Achieved good performance on RealBlur-R and RealBlur-J datasets.
+- Demonstrated strong generalization to the UHDM dataset, despite its challenging high-resolution scenarios.
+- Significant improvements in robustness, as shown by hard positive and negative case analysis.
+
+<img width="425" alt="image" src="https://github.com/user-attachments/assets/74651596-d0d6-48ce-ae2c-df91796afd42">
+
+Some Examples:
+<img width="798" alt="image" src="https://github.com/user-attachments/assets/52583876-fe51-49e4-a533-35cf92d63c6b">
 
 ## Installation
 
-See [INSTALL.md](INSTALL.md) for the installation of dependencies required to run Restormer.
+Follow these steps to set up the environment:
 
-## Demo
+```bash
+# Clone the repository
+git clone https://github.com/your-repo/image-deblurring
+cd image-deblurring
 
-To test the pre-trained Restormer models of [Deraining](https://drive.google.com/drive/folders/1ZEDDEVW0UgkpWi-N4Lj_JUoVChGXCu_u), [Motion Deblurring](https://drive.google.com/drive/folders/1czMyfRTQDX3j3ErByYeZ1PM4GVLbJeGK), [Defocus Deblurring](https://drive.google.com/drive/folders/1bRBG8DG_72AGA6-eRePvChlT5ZO4cwJ4?usp=sharing), and [Denoising](https://drive.google.com/drive/folders/1Qwsjyny54RZWa7zC4Apg7exixLBo4uF0) on your own images, you can either use Google Colab [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1C2818h7KnjNv4R1sabe14_AYL7lWhmu6?usp=sharing), or command line as following
-```
-python demo.py --task Task_Name --input_dir path_to_images --result_dir save_images_here
-```
-Example usage to perform Defocus Deblurring on a directory of images:
-```
-python demo.py --task Single_Image_Defocus_Deblurring --input_dir './demo/degraded/' --result_dir './demo/restored/'
-```
-Example usage to perform Defocus Deblurring on an image directly:
-```
-python demo.py --task Single_Image_Defocus_Deblurring --input_dir './demo/degraded/portrait.jpg' --result_dir './demo/restored/'
+# Install dependencies
+pip install -r requirements.txt
 ```
 
-## Training and Evaluation
+Refer to `INSTALL.md` for detailed setup instructions.
 
-Training and Testing instructions for Deraining, Motion Deblurring, Defocus Deblurring, and Denoising are provided in their respective directories. Here is a summary table containing hyperlinks for easy navigation:
+## Usage
 
-<table>
-  <tr>
-    <th align="left">Task</th>
-    <th align="center">Training Instructions</th>
-    <th align="center">Testing Instructions</th>
-    <th align="center">Restormer's Visual Results</th>
-  </tr>
-  <tr>
-    <td align="left">Deraining</td>
-    <td align="center"><a href="Deraining/README.md#training">Link</a></td>
-    <td align="center"><a href="Deraining/README.md#evaluation">Link</a></td>
-    <td align="center"><a href="https://drive.google.com/drive/folders/1HcLc6v03q_sP_lRPcl7_NJmlB9f48TWU?usp=sharing">Download</a></td>
-  </tr>
-  <tr>
-    <td>Motion Deblurring</td>
-    <td align="center"><a href="Motion_Deblurring/README.md#training">Link</a></td>
-    <td align="center"><a href="Motion_Deblurring/README.md#evaluation">Link</a></td>
-    <td align="center"><a href="https://drive.google.com/drive/folders/1qla3HEOuGapv1hqBwXEMi2USFPB2qmx_?usp=sharing">Download</a></td>
-  </tr>
-  <tr>
-    <td>Defocus Deblurring</td>
-    <td align="center"><a href="Defocus_Deblurring/README.md#training">Link</a></td>
-    <td align="center"><a href="Defocus_Deblurring/README.md#evaluation">Link</a></td>
-    <td align="center"><a href="https://drive.google.com/drive/folders/1V_pLc9CZFe4vN7c4SxtXsXKi2FnLUt98?usp=sharing">Download</a></td>
-  </tr>
-  <tr>
-    <td>Gaussian Denoising</td>
-    <td align="center"><a href="Denoising/README.md#training">Link</a></td>
-    <td align="center"><a href="Denoising/README.md#evaluation">Link</a></td>
-    <td align="center"><a href="https://drive.google.com/drive/folders/1rEAHUBkA9uCe9Q0AzI5zkYxePSgxYDEG?usp=sharing">Download</a></td>
-  </tr>
-  <tr>
-    <td>Real Denoising</td>
-    <td align="center"><a href="Denoising/README.md#training-1">Link</a></td>
-    <td align="center"><a href="Denoising/README.md#evaluation-1">Link</a></td>
-    <td align="center"><a href="https://drive.google.com/file/d/1CsEiN6R0hlmEoSTyy48nnhfF06P5aRR7/view?usp=sharing">Download</a></td>
-  </tr>
-</table>
+### Running Inference
+To test the improved model on your own images:
 
-## Results
-Experiments are performed for different image processing tasks including, image deraining, single-image motion deblurring, defocus deblurring (both on single image and dual pixel data), and image denoising (both on Gaussian and real data). 
+```bash
+python demo.py --task Motion_Deblurring --input_dir /path/to/images --result_dir /path/to/save_results
+```
 
-<details>
-<summary><strong>Image Deraining</strong> (click to expand) </summary>
+### Training
+Follow the instructions in the `train` directory to train the model on your dataset.
 
-<img src = "https://i.imgur.com/mMoqYJi.png"> 
-</details>
+### Fine-Tuning
+Fine-tuning scripts for RealBlur and UHDM datasets are available in the `fine_tune` directory.
 
-<details>
-<summary><strong>Single-Image Motion Deblurring</strong> (click to expand) </summary>
+## Acknowledgments
+This work builds upon the [Restormer](https://github.com/swz30/Restormer) architecture by Syed Waqas Zamir, Aditya Arora, Salman Khan, Munawar Hayat, Fahad Shahbaz Khan, and Ming-Hsuan Yang. We acknowledge their contributions and innovative work in developing an efficient transformer model for high-resolution image restoration.
 
-<p align="center"><img src = "https://i.imgur.com/htagDSl.png" width="400"></p></details>
+### Citation
+If you use this work or the Restormer architecture, please cite:
 
-<details>
-<summary><strong>Defocus Deblurring</strong> (click to expand) </summary>
-
-S: single-image defocus deblurring.
-D: dual-pixel defocus deblurring.
-
-<img src = "https://i.imgur.com/sfKnLG2.png"> 
-</details>
-
-
-<details>
-<summary><strong>Gaussian Image Denoising</strong> (click to expand) </summary>
-
-Top super-row: learning a single model to handle various noise levels.
-Bottom super-row: training a separate model for each noise level.
-
-<table>
-  <tr>
-    <td> <img src = "https://i.imgur.com/4vzV8Qy.png" width="400"> </td>
-    <td> <img src = "https://i.imgur.com/Sx986Xs.png" width="500"> </td>
-  </tr>
-  <tr>
-    <td><p align="center"><b>Grayscale</b></p></td>
-    <td><p align="center"><b>Color</b></p></td>
-  </tr>
-</table>
-</details>
-
-<details>
-<summary><strong>Real Image Denoising</strong> (click to expand) </summary>
-
-<img src = "https://i.imgur.com/6v5PRxj.png">
-</details>
-
-## Citation
-If you use Restormer, please consider citing:
-
-    @inproceedings{Zamir2021Restormer,
-        title={Restormer: Efficient Transformer for High-Resolution Image Restoration}, 
-        author={Syed Waqas Zamir and Aditya Arora and Salman Khan and Munawar Hayat 
-                and Fahad Shahbaz Khan and Ming-Hsuan Yang},
-        booktitle={CVPR},
-        year={2022}
-    }
-
-
-## Contact
-Should you have any question, please contact waqas.zamir@inceptioniai.org
-
-
-**Acknowledgment:** This code is based on the [BasicSR](https://github.com/xinntao/BasicSR) toolbox and [HINet](https://github.com/megvii-model/HINet). 
-
-## Our Related Works
-- Learning Enriched Features for Fast Image Restoration and Enhancement, TPAMI 2022. [Paper](https://www.waqaszamir.com/publication/zamir-2022-mirnetv2/) | [Code](https://github.com/swz30/MIRNetv2)
-- Multi-Stage Progressive Image Restoration, CVPR 2021. [Paper](https://arxiv.org/abs/2102.02808) | [Code](https://github.com/swz30/MPRNet)
-- Learning Enriched Features for Real Image Restoration and Enhancement, ECCV 2020. [Paper](https://arxiv.org/abs/2003.06792) | [Code](https://github.com/swz30/MIRNet)
-- CycleISP: Real Image Restoration via Improved Data Synthesis, CVPR 2020. [Paper](https://arxiv.org/abs/2003.07761) | [Code](https://github.com/swz30/CycleISP)
+```bibtex
+@inproceedings{Zamir2021Restormer,
+    title={Restormer: Efficient Transformer for High-Resolution Image Restoration},
+    author={Syed Waqas Zamir and Aditya Arora and Salman Khan and Munawar Hayat 
+            and Fahad Shahbaz Khan and Ming-Hsuan Yang},
+    booktitle={CVPR},
+    year={2022}
+}
+```
