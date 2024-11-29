@@ -1,0 +1,117 @@
+# general settings
+name: Deblurring_Restormer
+model_type: ImageCleanModel
+scale: 1
+num_gpu: 1  # Changed to 1 since you have one 4090
+manual_seed: 100
+
+# dataset and data loader settings
+datasets:
+  train:
+    name: TrainSet
+    type: Dataset_PairedImage
+    dataroot_gt: ./Motion_Deblurring/Datasets/train/RealBlur-J/target_crops
+    dataroot_lq: ./Motion_Deblurring/Datasets/train/RealBlur-J/input_crops
+    geometric_augs: true    
+    filename_tmpl: '{}'
+    io_backend:
+      type: disk
+
+    # Optimized data loader settings for 4090
+    use_shuffle: true
+    num_worker_per_gpu: 8  # Adjusted for 4090
+    batch_size_per_gpu: 2  # Increased for 24GB VRAM
+
+    ### Progressive training adjustments for 24GB VRAM
+    mini_batch_sizes: [12,8,6,4,2,1]  # Increased batch sizes
+    iters: [92000,64000,48000,36000,36000,24000]
+    gt_size: 384  # Max patch size
+    gt_sizes: [128,160,192,256,320,384]  # Progressive patch sizes
+    
+    dataset_enlarge_ratio: 1
+    prefetch_mode: ~
+
+  val:
+    name: ValSet
+    type: Dataset_PairedImage
+    dataroot_gt: ./Motion_Deblurring/Datasets/val/RealBlur-J/target_crops
+    dataroot_lq: ./Motion_Deblurring/Datasets/val/RealBlur-J/input_crops
+    io_backend:
+      type: disk
+
+# network structures
+network_g:
+  type: Restormer
+  inp_channels: 3
+  out_channels: 3
+  dim: 48
+  num_blocks: [4,6,6,8]
+  num_refinement_blocks: 4
+  heads: [1,2,4,8]
+  ffn_expansion_factor: 2.66
+  bias: False
+  LayerNorm_type: WithBias
+  dual_pixel_task: False
+
+# path
+path:
+  pretrain_network_g: './Motion_Deblurring/pretrained_models/motion_deblurring.pth'
+  strict_load_g: true
+  resume_state: ~
+
+# training settings
+train:
+  total_iter: 100000
+  warmup_iter: 0  # Added warmup for stability
+  use_grad_clip: true
+
+  scheduler:
+    type: CosineAnnealingRestartCyclicLR
+    periods: [30000, 70000]        
+    restart_weights: [1,1]
+    eta_mins: [0.0001,0.000001]
+    
+  mixing_augs:
+    mixup: false
+    mixup_beta: 1.2
+    use_identity: true
+
+  optim_g:
+    type: AdamW
+    lr: !!float 1e-4
+    weight_decay: !!float 1e-4
+    betas: [0.9, 0.999]
+
+  pixel_opt:
+    type: L1Loss
+    loss_weight: 1
+    reduction: mean
+
+# validation settings
+val:
+  window_size: 8
+  val_freq: !!float 4e3
+  save_img: false
+  rgb2bgr: true
+  use_image: true
+  max_minibatch: 12  # Increased for 4090
+
+  metrics:
+    psnr:
+      type: calculate_psnr
+      crop_border: 0
+      test_y_channel: false
+
+# logging settings
+logger:
+  print_freq: 1000
+  save_checkpoint_freq: !!float 4e3
+  use_tb_logger: true
+  wandb:
+    project: ~
+    resume_id: ~
+
+# dist training settings
+dist_params:
+  backend: nccl
+  port: 29500

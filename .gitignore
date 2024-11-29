@@ -31,3 +31,12 @@ RealBlur.tar.gz
 go1.11.1.linux-amd64.tar.gz
 libcudnn8-dev_8.0.5.39-1+cuda11.1_amd64.deb
 archive\ \(1\).zip
+
+
+# Ignore datasets and models
+inference/dataset/*
+inference/models/*
+!inference/dataset/.gitkeep
+!inference/models/.gitkeep
+Motion_Deblurring/conv_complete/Conv/test.zip
+Motion_Deblurring/Datasets/test/testrealblur.zip
