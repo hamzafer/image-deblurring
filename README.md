@@ -1,4 +1,5 @@
 # Efficient Transformer for High-Resolution Image Motion Deblurring
+<img width="807" alt="image" src="https://github.com/user-attachments/assets/1137b1cf-650e-4e23-8a8b-1afb3d3b206b">
 
 ## Overview
 
@@ -18,6 +19,7 @@ This project retains the core innovations of Restormer, including its multi-Dcon
 1. **Reduction in Parameters:** Number of layers and transformer blocks reduced to lower computational overhead.
 2. **Increased Attention Heads:** Doubling attention heads per stage to enhance feature extraction while balancing computational costs.
 3. **Custom Loss Function:** Integration of a frequency-domain loss alongside L1 pixel-wise loss for better preservation of fine details.
+<img width="807" alt="image" src="https://github.com/user-attachments/assets/db34f4a8-8052-470d-8584-fd7869ed6960">
 
 These modifications resulted in faster convergence, improved stability, and better performance across a range of datasets and challenging scenarios.
 
@@ -27,6 +29,7 @@ These modifications resulted in faster convergence, improved stability, and bett
 - **Color Jitter:** Simulates real-world variations in lighting conditions.
 - **Gaussian Blur:** Adds robustness against noise and blurring artifacts.
 - **Perspective Transform:** Models geometric distortions for diverse scenarios.
+<img width="807" alt="image" src="https://github.com/user-attachments/assets/e611ae62-953b-4651-b739-b3e703bbaf10">
 
 ### Frequency-Domain Loss
 Incorporates Fourier transform analysis to emphasize high-frequency details, crucial for sharp edges and textures.
@@ -59,6 +62,8 @@ Performance is measured using:
 - Demonstrated strong generalization to the UHDM dataset, despite its challenging high-resolution scenarios.
 - Significant improvements in robustness, as shown by hard positive and negative case analysis.
 <img width="807" alt="image" src="https://github.com/user-attachments/assets/74651596-d0d6-48ce-ae2c-df91796afd42">
+<img width="807" alt="image" src="https://github.com/user-attachments/assets/a564f129-5c5f-4ba3-9dc3-39ad272a2162">
+<img width="807" alt="image" src="https://github.com/user-attachments/assets/5405569f-a066-4217-b9f4-cb176ad1f24b">
 
 Some Examples:
 
