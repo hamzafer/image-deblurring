@@ -45,7 +45,7 @@ This project leverages a variety of datasets for training and evaluation:
    - <img width="402" alt="image" src="https://github.com/user-attachments/assets/cee8c05d-6421-467f-a641-d6f7f07c8222">
 3. **Ultra-High-Definition Motion Blurred (UHDM) Dataset:** High-resolution images (4K-6K) with complex blur patterns.
    - Dataset: [Kaggle UHDM Dataset](https://www.kaggle.com/datasets/soumikrakshit/uhdm-dataset)
-   - <img width="403" alt="image" src="https://github.com/user-attachments/assets/517771b3-2283-4f6a-991d-5e8724a0fd6c">
+   - <img width="402" alt="image" src="https://github.com/user-attachments/assets/517771b3-2283-4f6a-991d-5e8724a0fd6c">
 
 ## Evaluation Metrics
 Performance is measured using:
@@ -58,11 +58,11 @@ Performance is measured using:
 - Achieved good performance on RealBlur-R and RealBlur-J datasets.
 - Demonstrated strong generalization to the UHDM dataset, despite its challenging high-resolution scenarios.
 - Significant improvements in robustness, as shown by hard positive and negative case analysis.
-- <img width="425" alt="image" src="https://github.com/user-attachments/assets/74651596-d0d6-48ce-ae2c-df91796afd42">
+<img width="807" alt="image" src="https://github.com/user-attachments/assets/74651596-d0d6-48ce-ae2c-df91796afd42">
 
 Some Examples:
 
-<img width="798" alt="image" src="https://github.com/user-attachments/assets/52583876-fe51-49e4-a533-35cf92d63c6b">
+<img width="807" alt="image" src="https://github.com/user-attachments/assets/52583876-fe51-49e4-a533-35cf92d63c6b">
 
 
 <img width="807" alt="image" src="https://github.com/user-attachments/assets/130451c9-ede3-460c-a835-95b54843b08a">
