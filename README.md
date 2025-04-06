@@ -75,15 +75,12 @@ Some Examples:
 
 ## Installation
 
-The installation requirements are the same as those of Restormer. Please follow the steps below:
+Please follow the steps below:
 
 ```bash
 # Clone the repository
 git clone https://github.com/hamzafer/image-deblurring
 cd image-deblurring
-
-# Install dependencies
-pip install -r requirements.txt
 ```
 
 Refer to the original [Restormer](https://github.com/swz30/Restormer) repository for detailed setup instructions and dependencies.
