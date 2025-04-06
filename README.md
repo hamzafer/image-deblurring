@@ -83,7 +83,7 @@ git clone https://github.com/hamzafer/image-deblurring
 cd image-deblurring
 ```
 
-Refer to the original [Restormer](https://github.com/swz30/Restormer) repository for detailed setup instructions and dependencies.
+Refer to the original [Restormer](https://github.com/swz30/Restormer/blob/main/INSTALL.md) repository for detailed setup instructions and dependencies.
 
 
 ## Usage
