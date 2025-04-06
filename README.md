@@ -88,7 +88,8 @@ pip install -r requirements.txt
 Refer to `INSTALL.md` for detailed setup instructions.
 
 ## Usage
-Model weights can be found here: [Model Weights](https://studntnu-my.sharepoint.com/:f:/g/personal/muhamhz_ntnu_no/EvkFh21u5hZIr0TNXuW1HI0Bqyced3ZYhG_rxnOzyQD-Jw?e=vU817A)
+The model weights are available upon request.
+~~Model weights can be found here: [Model Weights](https://studntnu-my.sharepoint.com/:f:/g/personal/muhamhz_ntnu_no/EvkFh21u5hZIr0TNXuW1HI0Bqyced3ZYhG_rxnOzyQD-Jw?e=vU817A)~~
 
 ### Running Inference
 To test the improved model on your own images:
@@ -110,6 +111,13 @@ This work builds upon the [Restormer](https://github.com/swz30/Restormer) archit
 If you use this work or the Restormer architecture, please cite:
 
 ```bibtex
+@article{akmaral2025efficient,
+    title={Efficient Transformer for High Resolution Image Motion Deblurring},
+    author={Akmaral, Amanturdieva and Zafar, Muhammad Hamza},
+    journal={arXiv preprint arXiv:2501.18403},
+    year={2025}
+}
+
 @inproceedings{Zamir2021Restormer,
     title={Restormer: Efficient Transformer for High-Resolution Image Restoration},
     author={Syed Waqas Zamir and Aditya Arora and Salman Khan and Munawar Hayat 
@@ -117,4 +125,5 @@ If you use this work or the Restormer architecture, please cite:
     booktitle={CVPR},
     year={2022}
 }
+
 ```
