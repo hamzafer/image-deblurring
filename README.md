@@ -72,23 +72,26 @@ Some Examples:
 
 <img width="807" alt="image" src="https://github.com/user-attachments/assets/130451c9-ede3-460c-a835-95b54843b08a">
 
+
 ## Installation
 
-Follow these steps to set up the environment:
+The installation requirements are the same as those of Restormer. Please follow the steps below:
 
 ```bash
 # Clone the repository
-git clone https://github.com/your-repo/image-deblurring
+git clone https://github.com/hamzafer/image-deblurring
 cd image-deblurring
 
 # Install dependencies
 pip install -r requirements.txt
 ```
 
-Refer to `INSTALL.md` for detailed setup instructions.
+Refer to the original [Restormer](https://github.com/swz30/Restormer) repository for detailed setup instructions and dependencies.
+
 
 ## Usage
 The model weights are available upon request.
+
 ~~Model weights can be found here: [Model Weights](https://studntnu-my.sharepoint.com/:f:/g/personal/muhamhz_ntnu_no/EvkFh21u5hZIr0TNXuW1HI0Bqyced3ZYhG_rxnOzyQD-Jw?e=vU817A)~~
 
 ### Running Inference
